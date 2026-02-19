@@ -103,6 +103,9 @@ export default class RebilliaClient {
       await this.handleError(response);
     }
 
+    if (response.status === 204) {
+      return {} as T;
+    }
     return response.json() as Promise<T>;
   }
 }

@@ -4,14 +4,21 @@
 
 import type RebilliaClient from "../client.js";
 import type { Tool, ToolDefinition, ToolResult } from "./types.js";
-import { getCustomerTool } from "./getCustomer.js";
-import { listCustomersTool } from "./listCustomers.js";
+import { registerCustomerTools } from "./customers/index.js";
+import { registerProductTools } from "./products/index.js";
+import { registerRatePlanTools } from "./rate_plans/index.js";
+import { registerRatePlanChargeTools } from "./rate_plan_charges/index.js";
 
 // ============================================================================
 // Tool registry (storage)
 // ============================================================================
 
-const tools: Tool[] = [listCustomersTool, getCustomerTool];
+const tools: Tool[] = [
+  ...registerCustomerTools(),
+  ...registerProductTools(),
+  ...registerRatePlanTools(),
+  ...registerRatePlanChargeTools(),
+];
 
 /** All tool definitions for tools/list */
 export function getToolDefinitions(): ToolDefinition[] {
