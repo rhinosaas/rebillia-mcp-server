@@ -187,15 +187,15 @@ mcp/
 │   ├── services/             # API call layer (used by tools)
 │   │   ├── customerServices.ts
 │   │   ├── productServices.ts
-│   │   ├── ratePlanServices.ts
-│   │   └── ratePlanChargeServices.ts
+│   │   ├── productRatePlanServices.ts
+│   │   └── productRatePlanChargeServices.ts
 │   ├── tools/
 │   │   ├── index.ts          # Tool registry, getToolDefinitions(), executeTool()
 │   │   ├── types.ts          # Tool definition and handler types
 │   │   ├── customers/        # Customer tools (21)
 │   │   ├── products/         # Product tools (8)
-│   │   ├── rate_plans/       # Rate plan tools (7)
-│   │   └── rate_plan_charges/# Rate plan charge tools (5)
+│   │   ├── product_rate_plans/       # Product rate plan tools (7)
+│   │   └── product_rate_plan_charges/# Product rate plan charge tools (5)
 │   ├── resources/
 │   │   ├── index.ts          # listResources(), readResource()
 │   │   └── api-docs.ts       # Markdown content for rebillia://api/* URIs
