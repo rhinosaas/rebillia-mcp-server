@@ -9,6 +9,10 @@ Model Context Protocol (MCP) server for the [Rebillia Public API](https://apigui
   - **Products** (8 tools) – List, get, create, update, delete; update status; link/unlink external products
   - **Rate plans** (7 tools) – List by product, get, create, update, delete; update status; sync
   - **Rate plan charges** (5 tools) – List by rate plan, get, create, update, delete (with chargeType, chargeModel, billingPeriod, billingTiming enums and chargeTier array)
+  - **Subscriptions** (20 tools) – List, get, create, update, delete; status; next bill, upcoming charges, invoices, logs, external invoices; rate plans and rate plan charges (add/update/remove)
+  - **Invoices** (8 tools) – List, get, create, update, delete; charge (card/online with paymentType), charge_external (offline), void
+  - **Transactions** (4 tools) – List, get, refund (amount in **cents**), void (before settlement only)
+  - **Bill runs** (4 tools) – List (filter by completed/pending/error), get, update (newDateTime, ISO 8601), get bill run invoices
 - **Resources** – Read API docs via MCP resources (URIs under `rebillia://api/`):
   - Overview, authentication, customers, subscriptions, invoices
 - **Types** – TypeScript types aligned with the Rebillia Public API response shapes
@@ -43,7 +47,7 @@ Model Context Protocol (MCP) server for the [Rebillia Public API](https://apigui
    ```
 
    - `REBILLIA_API_KEY` – **Required.** Used as `X-AUTH-TOKEN` for all requests.
-   - `REBILLIA_API_URL` – Optional. Defaults to `https://api.rebillia.com/v1`.
+   - `REBILLIA_API_URL` – Optional. Defaults to `https://api.rebillia.com/v1` (include `/v1` for the Public API).
 
 3. **Build**
 
@@ -162,6 +166,62 @@ Responses are JSON from the Rebillia Public API (paginated for list endpoints, s
 | `update_rate_plan_charge` | Update charge by ID. |
 | `delete_rate_plan_charge` | Delete charge by ID. |
 
+#### Subscriptions (20 tools)
+
+| Tool | Description |
+|------|-------------|
+| `list_subscriptions` | List subscriptions (include, status, query, orderBy, sortBy, itemPerPage, pageNo). |
+| `get_subscription` | Get subscription by ID. |
+| `create_subscription` | Create subscription (customerId, name, companyCurrencyId, effectiveStartDate, ratePlan array). |
+| `update_subscription` | Update subscription by ID. |
+| `delete_subscription` | Delete subscription by ID. |
+| `update_subscription_status` | Update status (e.g. archived). |
+| `get_subscription_next_bill` | Preview next bill. |
+| `get_subscription_upcoming_charges` | Upcoming charges. |
+| `get_subscription_invoices` | Invoices for subscription. |
+| `get_subscription_logs` | Logs for subscription. |
+| `get_subscription_external_invoices` | External invoices. |
+| `list_subscription_rate_plans` | Rate plans on subscription. |
+| `get_subscription_rate_plan` | Get rate plan by ID. |
+| `add_subscription_rate_plan` | Add rate plan to subscription. |
+| `update_subscription_rate_plan` | Update rate plan (effectiveStartDate, etc.). |
+| `remove_subscription_rate_plan` | Remove rate plan from subscription. |
+| `get_subscription_rate_plan_charge` | Get rate plan charge by ID. |
+| `add_subscription_rate_plan_charge` | Add charge to rate plan. |
+| `update_subscription_rate_plan_charge` | Update rate plan charge. |
+| `remove_subscription_rate_plan_charge` | Remove charge from rate plan. |
+
+#### Invoices (8 tools)
+
+| Tool | Description |
+|------|-------------|
+| `list_invoices` | List invoices (include, status, query, orderBy, sortBy, filterId, itemPerPage, pageNo). |
+| `get_invoice` | Get invoice by ID. |
+| `create_invoice` | Create invoice. Required: companyCurrencyId, companyGatewayId, customerId, paymentMethodId, detail. Amount in dollar strings or cents in detail. |
+| `update_invoice` | Update invoice (only posted/requestPayment). |
+| `delete_invoice` | Delete invoice by ID. |
+| `charge_invoice` | Charge invoice (card/online). Required: invoiceId, amount (cents), paymentType (e.g. thirdPartyPaymentProvider). |
+| `charge_invoice_external` | Charge via offline (cash/check/wire). Required: invoiceId, amount (cents). |
+| `void_invoice` | Void invoice (irreversible). |
+
+#### Transactions (4 tools)
+
+| Tool | Description |
+|------|-------------|
+| `list_transactions` | List transactions (orderBy, sortBy, itemPerPage, pageNo). |
+| `get_transaction` | Get transaction by ID. |
+| `refund_transaction` | Refund transaction. Required: transactionId, amount (**in cents**, e.g. 250 = $2.50). |
+| `void_transaction` | Void transaction (before settlement only). |
+
+#### Bill runs (4 tools)
+
+| Tool | Description |
+|------|-------------|
+| `list_bill_runs` | List bill runs. Optional: include (e.g. invoice), query (completed/pending/error), orderBy, sortBy, itemPerPage, pageNo. |
+| `get_bill_run` | Get bill run by ID. |
+| `update_bill_run` | Update bill run schedule. Required: billRunId, newDateTime (ISO 8601, e.g. 2026-02-26T20:05:00Z). |
+| `get_bill_run_invoices` | Get invoices for a bill run. |
+
 ### Resources
 
 Resources expose API documentation as markdown. Use `resources/list` to see available URIs, then `resources/read` with a URI to get the content.
@@ -188,14 +248,22 @@ mcp/
 │   │   ├── customerServices.ts
 │   │   ├── productServices.ts
 │   │   ├── productRatePlanServices.ts
-│   │   └── productRatePlanChargeServices.ts
+│   │   ├── productRatePlanChargeServices.ts
+│   │   ├── subscriptionServices.ts
+│   │   ├── invoiceServices.ts
+│   │   ├── transactionServices.ts
+│   │   └── billRunServices.ts
 │   ├── tools/
 │   │   ├── index.ts          # Tool registry, getToolDefinitions(), executeTool()
 │   │   ├── types.ts          # Tool definition and handler types
-│   │   ├── customers/        # Customer tools (21)
+│   │   ├── customers/         # Customer tools (21)
 │   │   ├── products/         # Product tools (8)
 │   │   ├── product_rate_plans/       # Product rate plan tools (7)
-│   │   └── product_rate_plan_charges/# Product rate plan charge tools (5)
+│   │   ├── product_rate_plan_charges/# Rate plan charge tools (5)
+│   │   ├── subscriptions/    # Subscription tools (20)
+│   │   ├── invoices/         # Invoice tools (8)
+│   │   ├── transactions/     # Transaction tools (4)
+│   │   └── bill_runs/        # Bill run tools (4)
 │   ├── resources/
 │   │   ├── index.ts          # listResources(), readResource()
 │   │   └── api-docs.ts       # Markdown content for rebillia://api/* URIs

@@ -8,7 +8,10 @@ import { registerCustomerTools } from "./customers/index.js";
 import { registerProductTools } from "./products/index.js";
 import { registerProductRatePlanTools } from "./product_rate_plans/index.js";
 import { registerProductRatePlanChargeTools } from "./product_rate_plan_charges/index.js";
+import { registerInvoiceTools } from "./invoices/index.js";
 import { registerSubscriptionTools } from "./subscriptions/index.js";
+import { registerTransactionTools } from "./transactions/index.js";
+import { registerBillRunTools } from "./bill_runs/index.js";
 
 // ============================================================================
 // Tool registry (storage)
@@ -20,6 +23,9 @@ const tools: Tool[] = [
   ...registerProductRatePlanTools(),
   ...registerProductRatePlanChargeTools(),
   ...registerSubscriptionTools(),
+  ...registerInvoiceTools(),
+  ...registerTransactionTools(),
+  ...registerBillRunTools(),
 ];
 
 /** All tool definitions for tools/list */
