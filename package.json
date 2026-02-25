@@ -1,26 +1,48 @@
 {
   "name": "rebillia-mcp-server",
-  "version": "0.1.0",
-  "description": "MCP server for Rebillia integration",
+  "version": "1.0.0",
+  "description": "MCP server for the Rebillia subscription billing API",
   "type": "module",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "bin": {
     "rebillia-mcp-server": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "keywords": [
+    "mcp",
+    "rebillia",
+    "subscription",
+    "billing",
+    "ecommerce",
+    "ai",
+    "model-context-protocol",
+    "claude",
+    "chatgpt"
+  ],
+  "author": "Rebillia <hello@rebillia.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rebillia/rebillia-mcp-server.git"
+  },
+  "homepage": "https://github.com/rebillia/rebillia-mcp-server#readme",
+  "engines": {
+    "node": ">=18.0.0"
   },
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "tsx src/index.ts",
     "test": "vitest",
-    "prepublishOnly": "npm run build"
+    "test:run": "vitest run",
+    "prepublishOnly": "npm run build && npm test"
   },
-  "keywords": [
-    "mcp",
-    "rebillia",
-    "model-context-protocol"
-  ],
-  "author": "",
-  "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^0.5.0",
     "dotenv": "^17.3.1",

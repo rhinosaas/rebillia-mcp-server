@@ -25,7 +25,13 @@ Model Context Protocol (MCP) server for the [Rebillia Public API](https://apigui
 ## Requirements
 
 - Node.js 18+
-- A Rebillia API key (from your Rebillia dashboard)
+- A Rebillia API key (see below)
+
+### Getting Your API Key
+
+1. Sign up or log in at [admin.rebillia.com](https://admin.rebillia.com).
+2. Go to **Advance Settings** → **Api Accounts** → **Create new keys**.
+3. Copy the generated API key and use it as `REBILLIA_API_KEY` in your environment or MCP client config.
 
 ## Setup
 
@@ -85,26 +91,69 @@ Or run the binary:
 
 The server uses **stdio** transport: it reads JSON-RPC from stdin and writes responses to stdout. MCP clients connect to it as a subprocess.
 
-### Configuring an MCP client
+### Configuring Claude Desktop
 
-Example configuration for Cursor (or other MCP clients). Add the Rebillia server to your MCP settings, e.g. in `.cursor/rebillia-mcp-server.json` or the client's MCP config:
+1. **Build the server** (if you haven’t already):
+   ```bash
+   npm run build
+   ```
 
-```json
-{
-  "mcpServers": {
-    "rebillia": {
-      "command": "node",
-      "args": ["/absolute/path/to/rebillia-mcp-server/dist/index.js"],
-      "env": {
-        "REBILLIA_API_KEY": "your_api_key_here",
-        "REBILLIA_API_URL": "https://api.rebillia.com/v1"
-      }
-    }
-  }
-}
-```
+2. **Open the Claude Desktop MCP config file:**
+   - **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+   - **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
 
-Use the path to your built `dist/index.js` (or `npm start` / `npx rebillia-mcp-server` if your config supports it).
+3. **Add the Rebillia server** under `mcpServers`. Use the **absolute path** to your project’s `dist/index.js`:
+
+   ```json
+   {
+     "mcpServers": {
+       "rebillia": {
+         "command": "node",
+         "args": ["/absolute/path/to/rebillia-mcp-server/dist/index.js"],
+         "env": {
+           "REBILLIA_API_KEY": "your_api_key_here",
+           "REBILLIA_API_URL": "https://api.rebillia.com/v1"
+         }
+       }
+     }
+   }
+   ```
+
+4. **Restart Claude Desktop.** The Rebillia tools and resources (including `get_api_docs`) will appear. You can ask Claude to use the Rebillia API or to “get the API docs” for overview information.
+
+### Configuring Cursor
+
+1. **Build the server:**
+   ```bash
+   npm run build
+   ```
+
+2. **Open Cursor MCP settings:**
+   - **Settings** → **Cursor Settings** → **MCP**, or
+   - Open the MCP config file directly:
+     - **macOS/Linux:** `~/.cursor/rebillia-mcp-server.json` or project-level `.cursor/mcp.json`
+     - **Windows:** `%USERPROFILE%\.cursor\-rebillia-mcp-server.json`
+
+3. **Add the Rebillia server** in the MCP config. Example:
+
+   ```json
+   {
+     "mcpServers": {
+       "rebillia": {
+         "command": "node",
+         "args": ["/absolute/path/to/rebillia-mcp-server/dist/index.js"],
+         "env": {
+           "REBILLIA_API_KEY": "your_api_key_here",
+           "REBILLIA_API_URL": "https://api.rebillia.com/v1"
+         }
+       }
+     }
+   }
+   ```
+
+   Replace `/absolute/path/to/rebillia-mcp-server` with the real path to your Rebillia MCP server project (the folder that contains `dist/index.js`).
+
+4. **Restart Cursor** or reload the MCP servers. Rebillia tools and resources will be available in the AI chat (e.g. “List customers”, “Get API docs”).
 
 ### Tools
 
