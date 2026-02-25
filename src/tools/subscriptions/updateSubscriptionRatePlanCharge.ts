@@ -27,12 +27,13 @@ const schema = z.object({
   billingTiming: z.string().optional(),
   billingPeriodAlignment: z.string().optional(),
   specificBillingPeriod: z.number().int().optional(),
+  weight: z.coerce.number().int().min(0).optional(),
 });
 
 const definition = {
   name: "update_subscription_rate_plan_charge",
   description:
-    "Update a rate plan charge on a subscription. PUT /subscriptions/{subscriptionId}/rateplan-charges/{chargeId}. Optional: quantity, name, chargeType (oneTime|recurring|usage), chargeTier, billingPeriod, billingTiming, endDateCondition, taxable, etc.",
+    "Update a rate plan charge on a subscription. PUT /subscriptions/{subscriptionId}/rateplan-charges/{chargeId}. Optional: quantity, name, chargeType (oneTime|recurring|usage), chargeTier, billingPeriod, billingTiming, endDateCondition, taxable, weight (number), etc.",
   inputSchema: {
     type: "object" as const,
     properties: {
@@ -52,6 +53,7 @@ const definition = {
       billingTiming: { type: "string", description: "inAdvance, inArrears" },
       billingPeriodAlignment: { type: "string", description: "Alignment" },
       specificBillingPeriod: { type: "number", description: "Specific billing period" },
+      weight: { type: "number", description: "Weight (integer, sent as number to API)" },
     },
     required: ["subscriptionId", "chargeId"],
   },

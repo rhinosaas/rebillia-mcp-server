@@ -8,14 +8,9 @@
 import "dotenv/config";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import {
-  CallToolRequestSchema,
-  ListResourcesRequestSchema,
-  ListToolsRequestSchema,
-  ReadResourceRequestSchema,
-} from "@modelcontextprotocol/sdk/types.js";
+import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 import RebilliaClient from "./client.js";
-import { listResources, readResource } from "./resources/index.js";
+import { registerResources } from "./resources/api-docs.js";
 import { executeTool, getToolDefinitions } from "./tools/index.js";
 
 // ============================================================================
@@ -53,24 +48,10 @@ const server = new Server(
 );
 
 // ============================================================================
-// Handle resources/list
+// Resources (rebillia://docs/* – overview, models, subscription-statuses, charge-types)
 // ============================================================================
 
-server.setRequestHandler(ListResourcesRequestSchema, async () => {
-  return { resources: listResources() };
-});
-
-// ============================================================================
-// Handle resources/read
-// ============================================================================
-
-server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
-  const result = readResource(request.params.uri);
-  if (!result) {
-    throw new Error(`Resource not found: ${request.params.uri}`);
-  }
-  return result;
-});
+registerResources(server);
 
 // ============================================================================
 // Handle tools/list

@@ -26,6 +26,14 @@ export interface SubscriptionChargeTierItem {
   tier?: number;
 }
 
+/** Ensure each charge tier has priceFormat (API requires it). Default to "" when missing. */
+function normalizeChargeTier(tiers: SubscriptionChargeTierItem[]): SubscriptionChargeTierItem[] {
+  return tiers.map((tier) => ({
+    ...tier,
+    priceFormat: tier.priceFormat ?? "",
+  }));
+}
+
 /** Nested rate plan charge in create subscription. Can reference productRatePlanChargeId + quantity or full definition with chargeTier. */
 export interface SubscriptionRatePlanChargeItem {
   productRatePlanChargeId?: number;
@@ -400,6 +408,8 @@ export async function addSubscriptionRatePlanCharge(
   const payload = Object.fromEntries(
     Object.entries(body).filter(([, v]) => v !== undefined)
   ) as AddSubscriptionRatePlanChargeBody;
+  if (payload.weight != null) payload.weight = Number(payload.weight);
+  if (payload.chargeTier?.length) payload.chargeTier = normalizeChargeTier(payload.chargeTier);
   // Always send a JSON body; API may require productRatePlanChargeId or full charge definition
   const postBody = Object.keys(payload).length ? payload : { quantity: body.quantity };
   return client.post<unknown>(
@@ -421,6 +431,7 @@ export interface UpdateSubscriptionRatePlanChargeBody {
   billingTiming?: string;
   billingPeriodAlignment?: string;
   specificBillingPeriod?: number;
+  weight?: number;
   [k: string]: unknown;
 }
 
@@ -433,6 +444,8 @@ export async function updateSubscriptionRatePlanCharge(
   const payload = Object.fromEntries(
     Object.entries(body).filter(([, v]) => v !== undefined)
   ) as UpdateSubscriptionRatePlanChargeBody;
+  if (payload.weight != null) payload.weight = Number(payload.weight);
+  if (payload.chargeTier?.length) payload.chargeTier = normalizeChargeTier(payload.chargeTier);
   return client.put<unknown>(
     `/subscriptions/${subscriptionId}/rateplan-charges/${chargeId}`,
     Object.keys(payload).length ? payload : undefined

@@ -27,6 +27,14 @@ export interface ChargeTierItem {
   tier?: number;
 }
 
+/** Ensure each charge tier has priceFormat (API requires it). Default to "" when missing. */
+function normalizeChargeTier(chargeTier: ChargeTierItem[]): ChargeTierItem[] {
+  return chargeTier.map((tier) => ({
+    ...tier,
+    priceFormat: tier.priceFormat ?? "",
+  }));
+}
+
 export interface ListRatePlanChargesParams {
   include?: string;
   orderBy?: string;
@@ -116,7 +124,10 @@ export async function createRatePlanCharge(
   client: Client,
   body: CreateRatePlanChargeBody
 ): Promise<unknown> {
-  return client.post<unknown>("/product-rateplan-charges", body);
+  const payload = { ...body };
+  if (payload.weight != null) payload.weight = Number(payload.weight);
+  if (payload.chargeTier?.length) payload.chargeTier = normalizeChargeTier(payload.chargeTier);
+  return client.post<unknown>("/product-rateplan-charges", payload);
 }
 
 export async function updateRatePlanCharge(
@@ -127,6 +138,8 @@ export async function updateRatePlanCharge(
   const payload = Object.fromEntries(
     Object.entries(body).filter(([, v]) => v !== undefined)
   ) as UpdateRatePlanChargeBody;
+  if (payload.weight != null) payload.weight = Number(payload.weight);
+  if (payload.chargeTier?.length) payload.chargeTier = normalizeChargeTier(payload.chargeTier);
   return client.put<unknown>(
     `/product-rateplan-charges/${chargeId}`,
     Object.keys(payload).length ? payload : undefined

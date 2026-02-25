@@ -42,7 +42,7 @@ const schema = z.object({
   category: z.enum(["physical", "digital"]),
   chargeTier: z.array(chargeTierItemSchema).min(1, "chargeTier must have at least one item"),
   taxable: z.boolean(),
-  weight: z.number().int().min(0),
+  weight: z.coerce.number().int().min(0, "weight must be a non-negative number"),
   description: z.string().optional(),
   billingPeriod: z.enum(billingPeriodEnum).optional(),
   billingTiming: z.enum(billingTimingEnum).optional(),

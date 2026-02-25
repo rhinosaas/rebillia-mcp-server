@@ -38,7 +38,7 @@ const schema = z
     category: z.enum(["physical", "digital"]).optional(),
     chargeTier: z.array(chargeTierItemSchema).min(1).optional(),
     taxable: z.boolean().optional(),
-    weight: z.number().int().min(0).optional(),
+    weight: z.coerce.number().int().min(0).optional(),
     endDateCondition: z.enum(["subscriptionEnd", "fixedPeriod"]).optional(),
     billingPeriod: z.string().optional(),
     billingTiming: z.string().optional(),

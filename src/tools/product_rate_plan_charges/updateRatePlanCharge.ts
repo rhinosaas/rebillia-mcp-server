@@ -26,7 +26,7 @@ const schema = z.object({
   category: z.enum(["physical", "digital"]).optional(),
   chargeTier: z.array(chargeTierItemSchema).optional(),
   taxable: z.boolean().optional(),
-  weight: z.number().int().min(0).optional(),
+  weight: z.coerce.number().int().min(0).optional(),
   description: z.string().optional(),
   billingPeriod: z.enum(billingPeriodEnum).optional(),
   billingTiming: z.enum(billingTimingEnum).optional(),
@@ -35,7 +35,7 @@ const schema = z.object({
 const definition = {
   name: "update_rate_plan_charge",
   description:
-    "Update a rate plan charge. PUT /product-rateplan-charges/{chargeId}. Optional: name, chargeType (oneTime|recurring|usage), chargeModel (flatFeePricing|perUnitPricing|tieredPricing|volumePricing), category, chargeTier array, taxable, weight, billingPeriod (day|week|month|year), billingTiming (inAdvance|inArrears).",
+    "Update a rate plan charge. PUT /product-rateplan-charges/{chargeId}. Optional: name, chargeType, chargeModel, category, chargeTier (each item: currency, price; priceFormat is required by API—sent as empty string if omitted), taxable, weight, billingPeriod, billingTiming.",
   inputSchema: {
     type: "object" as const,
     properties: {
@@ -46,7 +46,7 @@ const definition = {
       category: { type: "string", description: "physical or digital" },
       chargeTier: {
         type: "array",
-        description: "Array of {currency, price, optional startingUnit, endingUnit, priceFormat, tier}",
+        description: "Array of {currency, price, optional startingUnit, endingUnit, priceFormat (required by API; default '' if omitted), tier}",
       },
       taxable: { type: "boolean", description: "Whether taxable" },
       weight: { type: "number", description: "Weight (integer)" },

@@ -13,8 +13,13 @@ Model Context Protocol (MCP) server for the [Rebillia Public API](https://apigui
   - **Invoices** (8 tools) – List, get, create, update, delete; charge (card/online with paymentType), charge_external (offline), void
   - **Transactions** (4 tools) – List, get, refund (amount in **cents**), void (before settlement only)
   - **Bill runs** (4 tools) – List (filter by completed/pending/error), get, update (newDateTime, ISO 8601), get bill run invoices
-- **Resources** – Read API docs via MCP resources (URIs under `rebillia://api/`):
-  - Overview, authentication, customers, subscriptions, invoices
+- **Gateways** (6 tools) – List, get, create, update, delete, test gateway
+- **Currencies** (7 tools) – List, get, create, update, delete, get/set default currency
+- **Integrations** (8 tools) – List, get config, get/list by key; external invoices, products, order statuses
+- **Shipping** (2 tools) – List shipping services, calculate shipping
+- **Filters** (3 tools) – List filters (section required), create filter, list filter fields
+- **Documentation** (1 tool) – `get_api_docs` returns overview or other API docs as markdown (no external fetch)
+- **Resources** – API docs via MCP resources (`rebillia://docs/*`): overview, models, subscription-statuses, charge-types. All docs are self-contained; use these or the tool instead of fetching external URLs.
 - **Types** – TypeScript types aligned with the Rebillia Public API response shapes
 
 ## Requirements
@@ -222,26 +227,80 @@ Responses are JSON from the Rebillia Public API (paginated for list endpoints, s
 | `update_bill_run` | Update bill run schedule. Required: billRunId, newDateTime (ISO 8601, e.g. 2026-02-26T20:05:00Z). |
 | `get_bill_run_invoices` | Get invoices for a bill run. |
 
+#### Gateways (6 tools)
+
+| Tool | Description |
+|------|-------------|
+| `list_gateways` | List company gateways. |
+| `get_gateway` | Get gateway by ID. |
+| `create_gateway` | Create gateway (gblGatewayId, name, setting credentials). |
+| `update_gateway` | Update gateway by ID. |
+| `delete_gateway` | Delete gateway by ID. |
+| `test_gateway` | Test gateway connection. |
+
+#### Currencies (7 tools)
+
+| Tool | Description |
+|------|-------------|
+| `list_currencies` | List company currencies. |
+| `get_currency` | Get currency by ID. |
+| `create_currency` | Create company currency. |
+| `update_currency` | Update currency by ID. |
+| `delete_currency` | Delete currency by ID. |
+| `get_default_currency` | Get default company currency. |
+| `set_default_currency` | Set default currency by ID. |
+
+#### Integrations (8 tools)
+
+| Tool | Description |
+|------|-------------|
+| `list_integrations` | List company integrations. |
+| `get_integration_config` | Get integration config by ID. |
+| `get_integration_by_key` | Get integration by key. |
+| `list_integrations_by_key` | List integrations by key. |
+| `list_external_invoices` | List external invoices. |
+| `list_external_products` | List external products (productName required). |
+| `get_external_product` | Get external product by ID. |
+| `list_order_statuses` | List order statuses. |
+
+#### Shipping (2 tools)
+
+| Tool | Description |
+|------|-------------|
+| `list_shipping_services` | List shipping services. |
+| `calculate_shipping` | Calculate shipping (companyCurrencyId, fromZip, fromCountry, zip, country, weight, orderAmount, etc.). |
+
+#### Filters (3 tools)
+
+| Tool | Description |
+|------|-------------|
+| `list_filters` | List company filters. Required: section (e.g. subscriptions, invoices, customers, products, orders, billRuns). |
+| `create_filter` | Create filter (section, displayName, rules). |
+| `list_filter_fields` | List filter fields for a section. |
+
+#### Documentation (1 tool)
+
+| Tool | Description |
+|------|-------------|
+| `get_api_docs` | Get Rebillia API documentation as markdown. Default: overview (base URLs, auth, pagination, dates, amounts). Optional: doc = overview \| models \| subscription-statuses \| charge-types. Use this so Claude can read docs without fetching external URLs. |
+
 ### Resources
 
-Resources expose API documentation as markdown. Use `resources/list` to see available URIs, then `resources/read` with a URI to get the content.
+API documentation is exposed as MCP resources under `rebillia://docs/*`. Use `resources/list` then `resources/read` with the URI, or call the `get_api_docs` tool. All docs are self-contained; do not fetch external URLs.
 
 | URI | Description |
 |-----|-------------|
-| `rebillia://api/overview` | API overview and base URL |
-| `rebillia://api/authentication` | Auth (X-AUTH-TOKEN) |
-| `rebillia://api/customers` | Customers endpoints and parameters |
-| `rebillia://api/subscriptions` | Subscriptions and rate plans |
-| `rebillia://api/invoices` | Invoices endpoints |
-
-Full interactive API reference: [https://apiguide.rebillia.com/](https://apiguide.rebillia.com/)
+| `rebillia://docs/overview` | Overview documentation – base URLs, auth, pagination, date format, amount handling (read this first) |
+| `rebillia://docs/models` | Domain model hierarchy and relationships |
+| `rebillia://docs/subscription-statuses` | Subscription statuses: active, paused, archived, requestPayment |
+| `rebillia://docs/charge-types` | chargeType, chargeModel, billingPeriod, billingTiming enums |
 
 ## Project structure
 
 ```
 mcp/
 ├── src/
-│   ├── index.ts              # MCP server entry, handlers for tools & resources
+│   ├── index.ts              # MCP server entry, registerResources(), tools & resources handlers
 │   ├── client.ts             # HTTP client for Rebillia API (X-AUTH-TOKEN)
 │   ├── types.ts              # Rebillia API types (customers, invoices, etc.)
 │   ├── services/             # API call layer (used by tools)
@@ -252,21 +311,32 @@ mcp/
 │   │   ├── subscriptionServices.ts
 │   │   ├── invoiceServices.ts
 │   │   ├── transactionServices.ts
-│   │   └── billRunServices.ts
+│   │   ├── billRunServices.ts
+│   │   ├── gatewayServices.ts
+│   │   ├── currencyServices.ts
+│   │   ├── integrationServices.ts
+│   │   ├── shippingServices.ts
+│   │   └── filterServices.ts
 │   ├── tools/
 │   │   ├── index.ts          # Tool registry, getToolDefinitions(), executeTool()
 │   │   ├── types.ts          # Tool definition and handler types
-│   │   ├── customers/         # Customer tools (21)
+│   │   ├── customers/        # Customer tools (21)
 │   │   ├── products/         # Product tools (8)
-│   │   ├── product_rate_plans/       # Product rate plan tools (7)
+│   │   ├── product_rate_plans/        # Rate plan tools (7)
 │   │   ├── product_rate_plan_charges/# Rate plan charge tools (5)
-│   │   ├── subscriptions/    # Subscription tools (20)
+│   │   ├── subscriptions/   # Subscription tools (20)
 │   │   ├── invoices/         # Invoice tools (8)
 │   │   ├── transactions/     # Transaction tools (4)
-│   │   └── bill_runs/        # Bill run tools (4)
+│   │   ├── bill_runs/        # Bill run tools (4)
+│   │   ├── gateways/         # Gateway tools (6)
+│   │   ├── currencies/       # Currency tools (7)
+│   │   ├── integrations/     # Integration tools (8)
+│   │   ├── shipping/         # Shipping tools (2)
+│   │   ├── filters/          # Filter tools (3)
+│   │   └── docs/             # get_api_docs (1)
 │   ├── resources/
-│   │   ├── index.ts          # listResources(), readResource()
-│   │   └── api-docs.ts       # Markdown content for rebillia://api/* URIs
+│   │   ├── index.ts          # listResources(), readResource() (legacy apiResources)
+│   │   └── api-docs.ts       # registerResources(), docResources (rebillia://docs/*), getDocContent()
 │   └── prompts/              # (reserved for MCP prompts)
 ├── .env.example
 ├── package.json

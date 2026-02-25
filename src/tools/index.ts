@@ -12,6 +12,12 @@ import { registerInvoiceTools } from "./invoices/index.js";
 import { registerSubscriptionTools } from "./subscriptions/index.js";
 import { registerTransactionTools } from "./transactions/index.js";
 import { registerBillRunTools } from "./bill_runs/index.js";
+import { registerGatewayTools } from "./gateways/index.js";
+import { registerCurrencyTools } from "./currencies/index.js";
+import { registerIntegrationTools } from "./integrations/index.js";
+import { registerShippingTools } from "./shipping/index.js";
+import { registerFilterTools } from "./filters/index.js";
+import { registerDocsTools } from "./docs/index.js";
 
 // ============================================================================
 // Tool registry (storage)
@@ -26,6 +32,12 @@ const tools: Tool[] = [
   ...registerInvoiceTools(),
   ...registerTransactionTools(),
   ...registerBillRunTools(),
+  ...registerGatewayTools(),
+  ...registerCurrencyTools(),
+  ...registerIntegrationTools(),
+  ...registerShippingTools(),
+  ...registerFilterTools(),
+  ...registerDocsTools(),
 ];
 
 /** All tool definitions for tools/list */
