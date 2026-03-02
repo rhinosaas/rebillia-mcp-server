@@ -1,5 +1,5 @@
 {
-  "name": "rebillia-mcp-server",
+  "name": "@rhinosaas/rebillia-mcp-server",
   "version": "1.0.0",
   "description": "MCP server for the Rebillia subscription billing API",
   "type": "module",
