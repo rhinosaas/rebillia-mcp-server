@@ -174,7 +174,7 @@ Responses are JSON from the Rebillia Public API (paginated for list endpoints, s
 | `list_customer_addresses` | List address book entries for a customer. |
 | `get_customer_address` | Get address by ID. |
 | `create_customer_address` | Create address (name, contactName, street1, city, state, zip, countryId, type, …). |
-| `update_customer_address` | Update address by ID. |
+| `update_customer_address` | Update address by ID. Required: customerId, addressId, street1, city, state, zip, countryId (valid IDs 1–250 from https://api.rebillia.com/globals/countries). Optional: name, contactName, street2, company, contactEmail, contactPhone, type. |
 | `delete_customer_address` | Delete address by ID. |
 | `list_customer_payment_methods` | List payment methods for a customer. |
 | `get_customer_payment_method` | Get payment method by ID. |
@@ -241,7 +241,7 @@ Responses are JSON from the Rebillia Public API (paginated for list endpoints, s
 | `update_subscription_rate_plan` | Update rate plan (effectiveStartDate, etc.). |
 | `remove_subscription_rate_plan` | Remove rate plan from subscription. |
 | `get_subscription_rate_plan_charge` | Get rate plan charge by ID. |
-| `add_subscription_rate_plan_charge` | Add charge to rate plan. |
+| `add_subscription_rate_plan_charge` | Add charge to rate plan. Required: subscriptionId, ratePlanId, quantity, name, category (physical\|digital), chargeModel (flatFeePricing\|perUnitPricing\|tieredPricing\|volumePricing), billCycleType, chargeTier (array: currency, price required; optional startingUnit, endingUnit, priceFormat, tier), chargeType (oneTime\|recurring\|usage), endDateCondition (subscriptionEnd\|fixedPeriod), taxable (boolean), weight. When chargeType is recurring, billingPeriodAlignment is also required. |
 | `update_subscription_rate_plan_charge` | Update rate plan charge. |
 | `remove_subscription_rate_plan_charge` | Remove charge from rate plan. |
 

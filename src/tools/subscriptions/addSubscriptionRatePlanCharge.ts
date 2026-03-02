@@ -17,46 +17,51 @@ const billCycleTypeEnum = [
 ] as const;
 
 const chargeTierItemSchema = z.object({
-  currency: z.string().min(1),
-  startingUnit: z.string().optional(),
-  endingUnit: z.string().optional(),
-  price: z.number().int(),
+  currency: z.string().min(1, "chargeTier[].currency is required"),
+  price: z.number().int().min(0, "chargeTier[].price is required"),
+  startingUnit: z.coerce.string().optional(),
+  endingUnit: z.coerce.string().optional(),
   priceFormat: z.string().optional(),
   tier: z.number().int().optional(),
 });
+
+const endDateConditionEnum = ["subscriptionEnd", "fixedPeriod"] as const;
 
 const schema = z
   .object({
     subscriptionId: z.string().min(1, "subscriptionId is required"),
     ratePlanId: z.string().min(1, "ratePlanId is required"),
     quantity: z.number().int().min(0, "quantity is required"),
+    name: z.string().min(1, "name is required"),
+    category: z.enum(["physical", "digital"], {
+      errorMap: () => ({ message: "category is required: physical or digital" }),
+    }),
+    chargeModel: z.enum(chargeModelEnum, {
+      errorMap: () => ({
+        message: "chargeModel is required: flatFeePricing|perUnitPricing|tieredPricing|volumePricing",
+      }),
+    }),
+    billCycleType: z.enum(billCycleTypeEnum, {
+      errorMap: () => ({
+        message:
+          "billCycleType is required: chargeTriggerDay|defaultFromCustomer|specificDayOfMonth|specificDayOfWeek|specificMonthOfYear|subscriptionStartDay|subscriptionFreeTrial",
+      }),
+    }),
+    chargeTier: z.array(chargeTierItemSchema).min(1, "chargeTier array with at least one item (currency, price required) is required"),
+    chargeType: z.enum(chargeTypeEnum, {
+      errorMap: () => ({ message: "chargeType is required: oneTime|recurring|usage" }),
+    }),
+    endDateCondition: z.enum(endDateConditionEnum, {
+      errorMap: () => ({ message: "endDateCondition is required: subscriptionEnd|fixedPeriod" }),
+    }),
+    taxable: z.boolean({ required_error: "taxable (boolean) is required" }),
+    weight: z.coerce.number().int().min(0, "weight is required"),
     productRatePlanChargeId: z.number().int().optional(),
-    name: z.string().min(1).optional(),
-    chargeType: z.enum(chargeTypeEnum).optional(),
-    chargeModel: z.enum(chargeModelEnum).optional(),
-    billCycleType: z.enum(billCycleTypeEnum).optional(),
-    category: z.enum(["physical", "digital"]).optional(),
-    chargeTier: z.array(chargeTierItemSchema).min(1).optional(),
-    taxable: z.boolean().optional(),
-    weight: z.coerce.number().int().min(0).optional(),
-    endDateCondition: z.enum(["subscriptionEnd", "fixedPeriod"]).optional(),
     billingPeriod: z.string().optional(),
     billingTiming: z.string().optional(),
     billingPeriodAlignment: z.string().optional(),
     specificBillingPeriod: z.number().int().optional(),
   })
-  .refine(
-    (data) =>
-      data.name != null &&
-      data.chargeTier != null &&
-      data.chargeTier.length >= 1 &&
-      data.billCycleType != null &&
-      data.endDateCondition != null,
-    {
-      message:
-        "API always requires: name, chargeTier (at least one item), billCycleType, endDateCondition.",
-    }
-  )
   .refine(
     (data) => data.chargeType !== "recurring" || data.billingPeriodAlignment != null,
     {
@@ -68,41 +73,90 @@ const schema = z
 const definition = {
   name: "add_subscription_rate_plan_charge",
   description:
-    "Add a rate plan charge to a subscription rate plan. POST .../rateplan-charges. Required: subscriptionId, ratePlanId, quantity, name, chargeTier (at least one {currency, price}), billCycleType, endDateCondition (subscriptionEnd|fixedPeriod). When chargeType is recurring, billingPeriodAlignment is also required (alignToCharge, alignToSubscriptionStart, alignToTermStart). Optional: productRatePlanChargeId, chargeType, chargeModel, category, taxable, weight, billingPeriod, billingTiming, specificBillingPeriod.",
+    "Add a rate plan charge to a subscription rate plan. POST .../rateplan-charges. Required: subscriptionId, ratePlanId, quantity, name, category (physical|digital), chargeModel (flatFeePricing|perUnitPricing|tieredPricing|volumePricing), billCycleType (chargeTriggerDay|defaultFromCustomer|specificDayOfMonth|specificDayOfWeek|specificMonthOfYear|subscriptionStartDay|subscriptionFreeTrial), chargeTier array (each: currency, price required; optional startingUnit, endingUnit, priceFormat, tier), chargeType (oneTime|recurring|usage), endDateCondition (subscriptionEnd|fixedPeriod), taxable (boolean), weight. When chargeType is recurring, billingPeriodAlignment is also required. Optional: productRatePlanChargeId, billingPeriod, billingTiming, specificBillingPeriod.",
   inputSchema: {
     type: "object" as const,
     properties: {
       subscriptionId: { type: "string", description: "Subscription ID (required)" },
       ratePlanId: { type: "string", description: "Subscription rate plan ID (required)" },
       quantity: { type: "number", description: "Quantity (required)" },
-      productRatePlanChargeId: { type: "number", description: "Product rate plan charge ID to reference" },
       name: { type: "string", description: "Charge name (required)" },
-      chargeType: { type: "string", description: "oneTime, recurring, or usage" },
-      chargeModel: { type: "string", description: "flatFeePricing, perUnitPricing, tieredPricing, or volumePricing" },
+      category: {
+        type: "string",
+        description: "Required. physical or digital",
+        enum: ["physical", "digital"],
+      },
+      chargeModel: {
+        type: "string",
+        description: "Required. flatFeePricing|perUnitPricing|tieredPricing|volumePricing",
+        enum: ["flatFeePricing", "perUnitPricing", "tieredPricing", "volumePricing"],
+      },
       billCycleType: {
         type: "string",
-        description: "Required. E.g. chargeTriggerDay, specificDayOfMonth, subscriptionStartDay",
+        description:
+          "Required. chargeTriggerDay|defaultFromCustomer|specificDayOfMonth|specificDayOfWeek|specificMonthOfYear|subscriptionStartDay|subscriptionFreeTrial",
+        enum: [
+          "chargeTriggerDay",
+          "defaultFromCustomer",
+          "specificDayOfMonth",
+          "specificDayOfWeek",
+          "specificMonthOfYear",
+          "subscriptionStartDay",
+          "subscriptionFreeTrial",
+        ],
       },
-      category: { type: "string", description: "physical or digital" },
       chargeTier: {
         type: "array",
-        description: "Required. At least one {currency, price in cents}. Optional: startingUnit, endingUnit, priceFormat, tier",
+        description:
+          "Required. Array of tiers: currency (required), price (required, e.g. cents), optional startingUnit, endingUnit, priceFormat, tier",
+        items: {
+          type: "object",
+          properties: {
+            currency: { type: "string", description: "Required" },
+            price: { type: "number", description: "Required (e.g. cents)" },
+            startingUnit: { type: "string", description: "Optional" },
+            endingUnit: { type: "string", description: "Optional" },
+            priceFormat: { type: "string", description: "Optional" },
+            tier: { type: "number", description: "Optional" },
+          },
+          required: ["currency", "price"],
+        },
       },
-      taxable: { type: "boolean", description: "Whether taxable" },
-      weight: { type: "number", description: "Weight (integer)" },
+      chargeType: {
+        type: "string",
+        description: "Required. oneTime|recurring|usage",
+        enum: ["oneTime", "recurring", "usage"],
+      },
       endDateCondition: {
         type: "string",
         description: "Required. subscriptionEnd or fixedPeriod",
+        enum: ["subscriptionEnd", "fixedPeriod"],
       },
+      taxable: { type: "boolean", description: "Required. Whether the charge is taxable" },
+      weight: { type: "number", description: "Required. Weight (integer)" },
+      productRatePlanChargeId: { type: "number", description: "Product rate plan charge ID to reference" },
       billingPeriod: { type: "string", description: "day, week, month, year" },
       billingTiming: { type: "string", description: "inAdvance, inArrears" },
       billingPeriodAlignment: {
         type: "string",
-        description: "Required when chargeType is recurring. E.g. alignToCharge, alignToSubscriptionStart, alignToTermStart",
+        description: "Required when chargeType is recurring. alignToCharge, alignToSubscriptionStart, alignToTermStart",
       },
       specificBillingPeriod: { type: "number", description: "Specific billing period" },
     },
-    required: ["subscriptionId", "ratePlanId", "quantity"],
+    required: [
+      "subscriptionId",
+      "ratePlanId",
+      "quantity",
+      "name",
+      "category",
+      "chargeModel",
+      "billCycleType",
+      "chargeTier",
+      "chargeType",
+      "endDateCondition",
+      "taxable",
+      "weight",
+    ],
   },
 };
 
