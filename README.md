@@ -242,7 +242,7 @@ Responses are JSON from the Rebillia Public API (paginated for list endpoints, s
 | `remove_subscription_rate_plan` | Remove rate plan from subscription. |
 | `get_subscription_rate_plan_charge` | Get rate plan charge by ID. |
 | `add_subscription_rate_plan_charge` | Add charge to rate plan. Required: subscriptionId, ratePlanId, quantity, name, category (physical\|digital), chargeModel (flatFeePricing\|perUnitPricing\|tieredPricing\|volumePricing), billCycleType, chargeTier (array: currency, price required; optional startingUnit, endingUnit, priceFormat, tier), chargeType (oneTime\|recurring\|usage), endDateCondition (subscriptionEnd\|fixedPeriod), taxable (boolean), weight. When chargeType is recurring, billingPeriodAlignment is also required. |
-| `update_subscription_rate_plan_charge` | Update rate plan charge. |
+| `update_subscription_rate_plan_charge` | Update rate plan charge. Required: subscriptionId, chargeId, quantity, name, chargeModel, billCycleType, chargeTier (currency, price), chargeType, endDateCondition, taxable, weight. When chargeType is recurring, billingPeriodAlignment required. |
 | `remove_subscription_rate_plan_charge` | Remove charge from rate plan. |
 
 #### Invoices (8 tools)
