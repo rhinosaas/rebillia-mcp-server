@@ -29,9 +29,11 @@ Model Context Protocol (MCP) server for the [Rebillia Public API](https://apigui
 
 ### Getting Your API Key
 
-1. Sign up or log in at [admin.rebillia.com](https://admin.rebillia.com).
-2. Go to **Advance Settings** → **Api Accounts** → **Create new keys**.
-3. Copy the generated API key and use it as `REBILLIA_API_KEY` in your environment or MCP client config.
+1. Go to [Rebillia setup / welcome](https://admin.rebillia.com/setup/welcome?source=dev).
+2. **Select a plan** and continue.
+3. **Sign up** (create an account) or **log in** if you already have a Rebillia account.
+4. After you’re in your company, open the **dashboard**.
+5. In the dashboard, **copy your API Token** and use it as `REBILLIA_API_KEY` in your environment or MCP client config.
 
 ## Setup
 
