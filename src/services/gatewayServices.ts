@@ -36,11 +36,13 @@ export async function listGateways(
   client: Client,
   params?: ListGatewaysParams
 ): Promise<unknown> {
-  const search = new URLSearchParams();
-  if (params?.status) search.append("status", params.status);
-  if (params?.companyCurrencyId) search.append("companyCurrencyId", params.companyCurrencyId);
-  if (params?.include) search.append("include", params.include);
-  const q = search.toString();
+  const searchParams: string[] = [];
+  if (params?.status) searchParams.push(`status=${encodeURIComponent(params.status)}`);
+  if (params?.companyCurrencyId) {
+    searchParams.push(`companyCurrencyId=${encodeURIComponent(params.companyCurrencyId)}`);
+  }
+  if (params?.include) searchParams.push(`include=${encodeURIComponent(params.include)}`);
+  const q = searchParams.join("&");
   return client.get<unknown>(`/gateways${q ? `?${q}` : ""}`);
 }
 
@@ -86,4 +88,17 @@ export async function testGateway(
   gatewayId: string
 ): Promise<unknown> {
   return client.get<unknown>(`/gateways/${gatewayId}/test`);
+}
+
+/** GET /gateways/{gatewayId}/client_token – client token for payment SDK (e.g. Braintree, Stripe). Optional customerId for PayFabric/vault. */
+export async function getClientToken(
+  client: Client,
+  gatewayId: string,
+  params?: { customerId?: number }
+): Promise<unknown> {
+  const q =
+    params?.customerId != null
+      ? `?customerId=${encodeURIComponent(String(params.customerId))}`
+      : "";
+  return client.get<unknown>(`/gateways/${gatewayId}/client_token${q}`);
 }

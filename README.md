@@ -13,7 +13,7 @@ Model Context Protocol (MCP) server for the [Rebillia Public API](https://apigui
   - **Invoices** (8 tools) – List, get, create, update, delete; charge (card/online with paymentType), charge_external (offline), void
   - **Transactions** (4 tools) – List, get, refund (amount in **cents**), void (before settlement only)
   - **Bill runs** (4 tools) – List (filter by completed/pending/error), get, update (newDateTime, ISO 8601), get bill run invoices
-- **Gateways** (6 tools) – List, get, create, update, delete, test gateway
+- **Gateways** (7 tools) – List, get, create, update, delete, test gateway, get client token
 - **Currencies** (7 tools) – List, get, create, update, delete, get/set default currency
 - **Integrations** (8 tools) – List, get config, get/list by key; external invoices, products, order statuses
 - **Shipping** (2 tools) – List shipping services, calculate shipping
@@ -278,7 +278,7 @@ Responses are JSON from the Rebillia Public API (paginated for list endpoints, s
 | `update_bill_run` | Update bill run schedule. Required: billRunId, newDateTime (ISO 8601, e.g. 2026-02-26T20:05:00Z). |
 | `get_bill_run_invoices` | Get invoices for a bill run. |
 
-#### Gateways (6 tools)
+#### Gateways (7 tools)
 
 | Tool | Description |
 |------|-------------|
@@ -288,6 +288,7 @@ Responses are JSON from the Rebillia Public API (paginated for list endpoints, s
 | `update_gateway` | Update gateway by ID. |
 | `delete_gateway` | Delete gateway by ID. |
 | `test_gateway` | Test gateway connection. |
+| `rebillia_get_client_token` | Get a payment gateway client token for checkout/payment SDKs. Required: gatewayId. Optional: customerId (Rebillia customer ID) to scope the token for saved payment methods; **required for PayFabric gateways**, optional for others. |
 
 #### Currencies (7 tools)
 
@@ -379,7 +380,7 @@ mcp/
 │   │   ├── invoices/         # Invoice tools (8)
 │   │   ├── transactions/     # Transaction tools (4)
 │   │   ├── bill_runs/        # Bill run tools (4)
-│   │   ├── gateways/         # Gateway tools (6)
+│   │   ├── gateways/         # Gateway tools (7)
 │   │   ├── currencies/       # Currency tools (7)
 │   │   ├── integrations/     # Integration tools (8)
 │   │   ├── shipping/         # Shipping tools (2)
