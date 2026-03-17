@@ -104,7 +104,7 @@ The server uses **stdio** transport: it reads JSON-RPC from stdin and writes res
    - **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
    - **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
 
-3. **Add the Rebillia server** under `mcpServers`. Use the **absolute path** to your project’s `dist/index.js`:
+3. **Add the Rebillia server** under `mcpServers`:
 
    ```json
    {
@@ -142,8 +142,8 @@ The server uses **stdio** transport: it reads JSON-RPC from stdin and writes res
    {
      "mcpServers": {
        "rebillia": {
-         "command": "node",
-         "args": ["/absolute/path/to/rebillia-mcp-server/dist/index.js"],
+         "command": "npx",
+         "args": ["@rhinosaas/rebillia-mcp-server"],
          "env": {
            "REBILLIA_API_KEY": "your_api_key_here",
            "REBILLIA_API_URL": "https://api.rebillia.com/v1"
@@ -152,8 +152,6 @@ The server uses **stdio** transport: it reads JSON-RPC from stdin and writes res
      }
    }
    ```
-
-   Replace `/absolute/path/to/rebillia-mcp-server` with the real path to your Rebillia MCP server project (the folder that contains `dist/index.js`).
 
 4. **Restart Cursor** or reload the MCP servers. Rebillia tools and resources will be available in the AI chat (e.g. “List customers”, “Get API docs”).
 
