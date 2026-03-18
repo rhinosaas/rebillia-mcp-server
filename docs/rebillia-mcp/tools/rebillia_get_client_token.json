@@ -1,0 +1,18 @@
+{
+  "name": "rebillia_get_client_token",
+  "description": "Get a payment gateway client token from Rebillia Public API. Use when building checkout, initializing a payment SDK (e.g. Braintree/Stripe), or saving payment methods. Optional customerId scopes the token to an existing customer (e.g. for vault). Only the PayFabric gateway requires customerId; for other gateways it is optional. Requires company API token (X-AUTH-TOKEN).",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "gatewayId": {
+        "type": "integer",
+        "description": "Company gateway ID (e.g. from rebillia_list_gateways or dashboard)."
+      },
+      "customerId": {
+        "type": "integer",
+        "description": "Optional. Rebillia customer ID when the token must be scoped to a customer (e.g. for saved payment methods). Required for PayFabric gateway."
+      }
+    },
+    "required": ["gatewayId"]
+  }
+}
