@@ -32,9 +32,9 @@ export interface InvoiceAddressInput {
   contactCompany?: string;
 }
 
-/** Line item for create invoice. amount in DOLLAR STRINGS e.g. '20.00'. */
+/** Line item for invoice create/update. amount in CENTS (e.g. 2000 = $20.00). */
 export interface InvoiceDetailItemInput {
-  amount: string;
+  amount: number;
   description?: string;
   qty?: number;
   [k: string]: unknown;

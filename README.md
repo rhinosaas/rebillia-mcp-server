@@ -251,7 +251,7 @@ Responses are JSON from the Rebillia Public API (paginated for list endpoints, s
 |------|-------------|
 | `list_invoices` | List invoices (include, status, query, orderBy, sortBy, filterId, itemPerPage, pageNo). |
 | `get_invoice` | Get invoice by ID. |
-| `create_invoice` | Create invoice. Required: companyCurrencyId, companyGatewayId, customerId, paymentMethodId, detail. Optional billingAddress/shippingAddress use countryCode (ISO 3166-1 alpha-2). Amount in dollar strings or cents in detail. |
+| `create_invoice` | Create invoice. Required: companyCurrencyId, companyGatewayId, customerId, paymentMethodId, detail. Optional billingAddress/shippingAddress use countryCode (ISO 3166-1 alpha-2). Amount can be '41.00' (dollars) or 4100 (cents); tool always sends cents to publicAPI. |
 | `update_invoice` | Update invoice (only posted/requestPayment). |
 | `delete_invoice` | Delete invoice by ID. |
 | `charge_invoice` | Charge invoice (card/online). Required: invoiceId, amount (cents), paymentType (e.g. thirdPartyPaymentProvider). |
