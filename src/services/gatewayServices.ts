@@ -102,3 +102,19 @@ export async function getClientToken(
       : "";
   return client.get<unknown>(`/gateways/${gatewayId}/client_token${q}`);
 }
+
+/**
+ * GET /gateways/{companyGatewayId}/customers/{customerId}/setup_intent (under /v1 base URL).
+ * Used by gateway flows (e.g. Stripe) to create/retrieve a SetupIntent and use setupIntent.id as paymentMethodNonce.
+ */
+export async function createSetupIntent(
+  client: Client,
+  companyGatewayId: string,
+  customerId: string
+): Promise<unknown> {
+  return client.get<unknown>(
+    `/gateways/${encodeURIComponent(companyGatewayId)}/customers/${encodeURIComponent(
+      customerId
+    )}/setup_intent`
+  );
+}

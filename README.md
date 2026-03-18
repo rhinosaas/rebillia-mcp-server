@@ -178,8 +178,8 @@ Responses are JSON from the Rebillia Public API (paginated for list endpoints, s
 | `delete_customer_address` | Delete address by ID. |
 | `list_customer_payment_methods` | List payment methods for a customer. |
 | `get_customer_payment_method` | Get payment method by ID. |
-| `create_customer_payment_method` | Create payment method (companyGatewayId, type, paymentNonce, billingAddress with countryCode). |
-| `update_customer_payment_method` | Update payment method billing address (billingAddress.countryCode). |
+| `create_customer_payment_method` | Create payment method (gateway-agnostic). Required: companyGatewayId, type, **paymentMethodNonce**, billingAddress (countryCode, …). Get client credential via get_client_token; use your payment UI to produce paymentMethodNonce. No raw card data or gateway-specific fields. |
+| `update_customer_payment_method` | Update payment method billing address (gateway-agnostic). Required: customerId, paymentMethodId, billingAddress (countryCode, …). No payment or gateway-specific fields. |
 | `delete_customer_payment_method` | Delete payment method by ID. |
 | `list_customer_charges_credits` | List charges/credits (optional status, type). |
 | `create_customer_charge_credit` | Create charge/credit (amount in **cents**, description, type, companyCurrencyId, category, …). |
@@ -276,7 +276,7 @@ Responses are JSON from the Rebillia Public API (paginated for list endpoints, s
 | `update_bill_run` | Update bill run schedule. Required: billRunId, newDateTime (ISO 8601, e.g. 2026-02-26T20:05:00Z). |
 | `get_bill_run_invoices` | Get invoices for a bill run. |
 
-#### Gateways (7 tools)
+#### Gateways (8 tools)
 
 | Tool | Description |
 |------|-------------|
@@ -286,7 +286,8 @@ Responses are JSON from the Rebillia Public API (paginated for list endpoints, s
 | `update_gateway` | Update gateway by ID. |
 | `delete_gateway` | Delete gateway by ID. |
 | `test_gateway` | Test gateway connection. |
-| `rebillia_get_client_token` | Get a payment gateway client token for checkout/payment SDKs. Required: gatewayId. Optional: customerId (Rebillia customer ID) to scope the token for saved payment methods; **required for PayFabric gateways**, optional for others. |
+| `get_client_token` | Get the gateway client credential to initialize your payment integration and produce a **paymentMethodNonce** for create_customer_payment_method. Gateway-agnostic. Required: gatewayId. Optional: customerId; **required for PayFabric**, optional for others. |
+| `create_setup_intent` | Create/retrieve a setup intent via `/gateways/{companyGatewayId}/customers/{customerId}/setup_intent`. Use setupIntent.id as **paymentMethodNonce** for create_customer_payment_method (gateway-agnostic payment flow). |
 
 #### Currencies (7 tools)
 

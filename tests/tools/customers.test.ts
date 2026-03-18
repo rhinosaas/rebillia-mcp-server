@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createCustomerTool } from "../../src/tools/customers/createCustomer.js";
+import { createCustomerPaymentMethodTool } from "../../src/tools/customers/createCustomerPaymentMethod.js";
 import { deleteCustomerTool } from "../../src/tools/customers/deleteCustomer.js";
 import { listCustomersTool } from "../../src/tools/customers/listCustomers.js";
 
@@ -129,6 +130,119 @@ describe("Customer tools", () => {
       expect(result.isError).toBe(true);
       expect((result as { content: [{ text: string }] }).content[0].text).toMatch(
         /lastName|email|required/i
+      );
+    });
+  });
+
+  describe("create_customer_payment_method", () => {
+    const billingAddress = {
+      countryCode: "US",
+      street1: "123 Main St",
+      city: "New York",
+      state: "NY",
+      zip: "10001",
+    };
+
+    beforeEach(() => {
+      (mockClient as { getRoot?: ReturnType<typeof vi.fn> }).getRoot = vi.fn().mockResolvedValue([
+        { id: 240, alpha2Code: "US", name: "United States of America" },
+      ]);
+    });
+
+    it("accepts paymentMethodNonce and sends paymentMethod.nonce upstream", async () => {
+      const created = { id: "pm-1", type: "card" };
+      mockClient.post.mockResolvedValueOnce(created);
+
+      const result = await createCustomerPaymentMethodTool.handler(mockClient as never, {
+        customerId: "cust-1",
+        companyGatewayId: "gw-1",
+        type: "card",
+        paymentMethodNonce: "fake-nonce-from-gateway",
+        billingAddress,
+      });
+
+      expect(mockClient.post).toHaveBeenCalledTimes(1);
+      expect(mockClient.post).toHaveBeenCalledWith(
+        "/customers/cust-1/paymentmethods",
+        expect.objectContaining({
+          companyGatewayId: "gw-1",
+          type: "card",
+          paymentMethod: { nonce: "fake-nonce-from-gateway" },
+          billingAddress: expect.objectContaining({
+            countryId: 240,
+            street1: "123 Main St",
+            city: "New York",
+            state: "NY",
+            zip: "10001",
+          }),
+        })
+      );
+      expect(result.isError).toBeFalsy();
+    });
+
+    it("accepts legacy paymentNonce and sends paymentMethod.nonce upstream", async () => {
+      const created = { id: "pm-2", type: "card" };
+      mockClient.post.mockResolvedValueOnce(created);
+
+      const result = await createCustomerPaymentMethodTool.handler(mockClient as never, {
+        customerId: "cust-2",
+        companyGatewayId: "gw-1",
+        type: "card",
+        paymentNonce: "legacy-nonce",
+        billingAddress,
+      });
+
+      expect(mockClient.post).toHaveBeenCalledTimes(1);
+      expect(mockClient.post).toHaveBeenCalledWith(
+        "/customers/cust-2/paymentmethods",
+        expect.objectContaining({
+          paymentMethod: { nonce: "legacy-nonce" },
+          billingAddress: expect.objectContaining({
+            countryId: 240,
+            street1: "123 Main St",
+            city: "New York",
+            state: "NY",
+            zip: "10001",
+          }),
+        })
+      );
+      expect(result.isError).toBeFalsy();
+    });
+
+    it("accepts legacy paymentNonce and sends paymentMethod.nonce upstream", async () => {
+      const created = { id: "pm-2", type: "card" };
+      mockClient.post.mockResolvedValueOnce(created);
+
+      const result = await createCustomerPaymentMethodTool.handler(mockClient as never, {
+        customerId: "cust-2",
+        companyGatewayId: "gw-1",
+        type: "card",
+        paymentNonce: "legacy-nonce",
+        billingAddress,
+      });
+
+      expect(mockClient.post).toHaveBeenCalledTimes(1);
+      expect(mockClient.post).toHaveBeenCalledWith(
+        "/customers/cust-2/paymentmethods",
+        expect.objectContaining({
+          paymentMethod: { nonce: "legacy-nonce" },
+        })
+      );
+      expect(result.isError).toBeFalsy();
+    });
+
+    it("rejects when neither paymentMethodNonce nor paymentNonce present", async () => {
+      const result = await createCustomerPaymentMethodTool.handler(mockClient as never, {
+        customerId: "cust-1",
+        companyGatewayId: "gw-1",
+        type: "card",
+        billingAddress,
+      });
+
+      expect(mockClient.post).not.toHaveBeenCalled();
+      expect(result.isError).toBe(true);
+      expect((result as { content: [{ text: string }] }).content[0].text).toMatch(
+        /paymentMethodNonce is required/i
       );
     });
   });

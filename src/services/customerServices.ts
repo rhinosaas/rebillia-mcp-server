@@ -346,6 +346,11 @@ export async function getCustomerPaymentMethod(
   );
 }
 
+/**
+ * Create payment method. paymentNonce is gateway-agnostic (e.g. Stripe SetupIntent id, Braintree nonce);
+ * upstream Rebillia API maps it per gateway. MCP tools only expose paymentMethodNonce; this layer
+ * receives the normalized value as paymentNonce and sends paymentMethod: { nonce }.
+ */
 export async function createCustomerPaymentMethod(
   client: Client,
   customerId: string,

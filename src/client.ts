@@ -78,6 +78,24 @@ export default class RebilliaClient {
   }
 
   /**
+   * POST request against API root (no /v1). Use for unversioned/internal endpoints.
+   */
+  async postRoot<T = any>(endpoint: string, data?: any): Promise<T> {
+    const url = `${this.rootBaseUrl()}${endpoint}`;
+    const response = await fetch(url, {
+      method: "POST",
+      headers: this.authenticate(),
+      body: data ? JSON.stringify(data) : undefined,
+    });
+
+    if (!response.ok) {
+      await this.handleError(response);
+    }
+
+    return response.json() as Promise<T>;
+  }
+
+  /**
    * POST request
    */
   async post<T = any>(endpoint: string, data?: any): Promise<T> {

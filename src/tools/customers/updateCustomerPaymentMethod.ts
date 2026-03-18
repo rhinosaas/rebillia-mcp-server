@@ -24,7 +24,7 @@ const schema = z.object({
 const definition = {
   name: "update_customer_payment_method",
   description:
-    "Update a payment method's billing address. PUT /customers/{customerId}/paymentmethods/{paymentMethodId}. Required: customerId, paymentMethodId, billingAddress (countryCode, street1, city, state, zip). Optional: street2. Only billing address is updated.",
+    "Update a payment method's billing address (gateway-agnostic). PUT /customers/{customerId}/paymentmethods/{paymentMethodId}. Required: customerId, paymentMethodId, billingAddress (countryCode, street1, city, state, zip). Optional: street2. No payment or gateway-specific fields.",
   inputSchema: {
     type: "object" as const,
     properties: {

@@ -10,9 +10,9 @@ const schema = z.object({
 });
 
 const definition = {
-  name: "rebillia_get_client_token",
+  name: "get_client_token",
   description:
-    "Get a payment gateway client token from Rebillia Public API. Use when building checkout, initializing a payment SDK (e.g. Braintree/Stripe), or saving payment methods. Optional customerId scopes the token to an existing customer (e.g. for vault). Required for PayFabric gateway; optional for others. Requires company API token (X-AUTH-TOKEN).",
+    "Get the gateway client credential to initialize your payment integration and produce a paymentMethodNonce. Use the returned value in your hosted payment UI; then pass the resulting token as paymentMethodNonce to create_customer_payment_method. Gateway-agnostic: no gateway-specific concepts in MCP. Optional customerId scopes the credential to a customer (e.g. for vault). Required for PayFabric; optional for others. Requires company API token (X-AUTH-TOKEN).",
   inputSchema: {
     type: "object" as const,
     properties: {
