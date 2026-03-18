@@ -19,7 +19,7 @@ Model Context Protocol (MCP) server for the [Rebillia Public API](https://apigui
 - **Shipping** (2 tools) – List shipping services, calculate shipping
 - **Filters** (3 tools) – List filters (section required), create filter, list filter fields
 - **Documentation** (1 tool) – `get_api_docs` returns overview or other API docs as markdown (no external fetch)
-- **Resources** – API docs via MCP resources (`rebillia://docs/*`): overview, models, subscription-statuses, charge-types. All docs are self-contained; use these or the tool instead of fetching external URLs.
+- **Resources** – API docs via MCP resources (`rebillia://docs/*`): overview, models, subscription-statuses, charge-types. Country list at `rebillia://globals/countries` (id, code, name) for use with address tools. All docs are self-contained; use these or the tool instead of fetching external URLs.
 - **Types** – TypeScript types aligned with the Rebillia Public API response shapes
 
 ## Requirements
@@ -173,13 +173,13 @@ Responses are JSON from the Rebillia Public API (paginated for list endpoints, s
 | `get_customer_logs` | Get logs for a customer. |
 | `list_customer_addresses` | List address book entries for a customer. |
 | `get_customer_address` | Get address by ID. |
-| `create_customer_address` | Create address (name, contactName, street1, city, state, zip, countryId, type, …). |
-| `update_customer_address` | Update address by ID. Required: customerId, addressId, street1, city, state, zip, countryId (valid IDs 1–250 from https://api.rebillia.com/globals/countries). Optional: name, contactName, street2, company, contactEmail, contactPhone, type. |
+| `create_customer_address` | Create address (name, contactName, street1, city, state, zip, countryCode (ISO 3166-1 alpha-2), type, …). |
+| `update_customer_address` | Update address by ID. Required: customerId, addressId, street1, city, state, zip, countryCode. Optional: name, contactName, street2, company, contactEmail, contactPhone, type. |
 | `delete_customer_address` | Delete address by ID. |
 | `list_customer_payment_methods` | List payment methods for a customer. |
 | `get_customer_payment_method` | Get payment method by ID. |
-| `create_customer_payment_method` | Create payment method (companyGatewayId, type, paymentNonce, billingAddress). |
-| `update_customer_payment_method` | Update payment method billing address. |
+| `create_customer_payment_method` | Create payment method (companyGatewayId, type, paymentNonce, billingAddress with countryCode). |
+| `update_customer_payment_method` | Update payment method billing address (billingAddress.countryCode). |
 | `delete_customer_payment_method` | Delete payment method by ID. |
 | `list_customer_charges_credits` | List charges/credits (optional status, type). |
 | `create_customer_charge_credit` | Create charge/credit (amount in **cents**, description, type, companyCurrencyId, category, …). |
@@ -251,7 +251,7 @@ Responses are JSON from the Rebillia Public API (paginated for list endpoints, s
 |------|-------------|
 | `list_invoices` | List invoices (include, status, query, orderBy, sortBy, filterId, itemPerPage, pageNo). |
 | `get_invoice` | Get invoice by ID. |
-| `create_invoice` | Create invoice. Required: companyCurrencyId, companyGatewayId, customerId, paymentMethodId, detail. Amount in dollar strings or cents in detail. |
+| `create_invoice` | Create invoice. Required: companyCurrencyId, companyGatewayId, customerId, paymentMethodId, detail. Optional billingAddress/shippingAddress use countryCode (ISO 3166-1 alpha-2). Amount in dollar strings or cents in detail. |
 | `update_invoice` | Update invoice (only posted/requestPayment). |
 | `delete_invoice` | Delete invoice by ID. |
 | `charge_invoice` | Charge invoice (card/online). Required: invoiceId, amount (cents), paymentType (e.g. thirdPartyPaymentProvider). |

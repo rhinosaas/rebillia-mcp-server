@@ -3,9 +3,11 @@ import type { Tool } from "../types.js";
 import type { Client } from "./helpers.js";
 import { errorResult, handleToolCall } from "./helpers.js";
 import * as customerService from "../../services/customerServices.js";
+import { mapBillingAddressInputToApiBillingAddress } from "../../types/addressInput.js";
+import { COUNTRY_CODE_DESCRIPTION_CONST } from "../../types/addressInput.js";
 
 const billingAddressSchema = z.object({
-  countryId: z.string().min(1, "billingAddress.countryId is required"),
+  countryCode: z.string().min(1, "billingAddress.countryCode is required"),
   street1: z.string().min(1, "billingAddress.street1 is required"),
   city: z.string().min(1, "billingAddress.city is required"),
   state: z.string().min(1, "billingAddress.state is required"),
@@ -26,7 +28,7 @@ const schema = z.object({
 const definition = {
   name: "create_customer_payment_method",
   description:
-    "Create a payment method for a customer. POST /customers/{customerId}/paymentmethods. Required: companyGatewayId, type (card or ach), paymentNonce, billingAddress (countryId, street1, city, state, zip). Sends body with paymentMethod: { nonce } and billingAddress.",
+    "Create a payment method for a customer. POST /customers/{customerId}/paymentmethods. Required: companyGatewayId, type (card or ach), paymentNonce, billingAddress (countryCode, street1, city, state, zip). Sends body with paymentMethod: { nonce } and billingAddress.",
   inputSchema: {
     type: "object" as const,
     properties: {
@@ -36,16 +38,16 @@ const definition = {
       paymentNonce: { type: "string", description: "Payment nonce from gateway (required); sent as paymentMethod.nonce in body" },
       billingAddress: {
         type: "object",
-        description: "Billing address (required): countryId, street1, city, state, zip; street2 optional",
+        description: "Billing address (required): countryCode, street1, city, state, zip; street2 optional",
         properties: {
-          countryId: { type: "string", description: "Country ID (required)" },
+          countryCode: { type: "string", description: COUNTRY_CODE_DESCRIPTION_CONST },
           street1: { type: "string", description: "Street line 1 (required)" },
           city: { type: "string", description: "City (required)" },
           state: { type: "string", description: "State (required)" },
           zip: { type: "string", description: "Postal code (required)" },
           street2: { type: "string", description: "Street line 2" },
         },
-        required: ["countryId", "street1", "city", "state", "zip"],
+        required: ["countryCode", "street1", "city", "state", "zip"],
       },
     },
     required: ["customerId", "companyGatewayId", "type", "paymentNonce", "billingAddress"],
@@ -58,12 +60,13 @@ async function handler(client: Client, args: Record<string, unknown> | undefined
     return errorResult(parsed.error.errors.map((e) => `${e.path.join(".")}: ${e.message}`).join("; "));
   }
   const { customerId, companyGatewayId, type, paymentNonce, billingAddress } = parsed.data;
+  const apiBillingAddress = await mapBillingAddressInputToApiBillingAddress(client, billingAddress);
   return handleToolCall(() =>
     customerService.createCustomerPaymentMethod(client, customerId, {
       companyGatewayId,
       type,
       paymentNonce,
-      billingAddress,
+      billingAddress: apiBillingAddress,
     })
   );
 }

@@ -61,6 +61,7 @@ export interface UpdateCustomerBody {
 
 export type AddressType = "residential" | "commercial";
 
+/** Upstream API body: countryId is internal (resolved from countryCode by MCP layer). */
 export interface CreateCustomerAddressBody {
   name: string;
   contactName: string;
@@ -68,7 +69,7 @@ export interface CreateCustomerAddressBody {
   city: string;
   state: string;
   zip: string;
-  countryId: string;
+  countryId: number;
   type: AddressType;
   street2?: string;
   company?: string;
@@ -84,16 +85,16 @@ export interface UpdateCustomerAddressBody {
   city?: string;
   state?: string;
   zip?: string;
-  countryId?: string;
+  countryId?: number;
   company?: string;
   contactEmail?: string;
   contactPhone?: string;
   type?: AddressType;
 }
 
-/** Billing address for payment method (CustomerPaymentMethodService::createPayment). */
+/** Billing address for payment method (upstream API: countryId). */
 export interface CreatePaymentMethodBillingAddress {
-  countryId: string;
+  countryId: number;
   street1: string;
   city: string;
   state: string;
@@ -111,9 +112,9 @@ export interface CreateCustomerPaymentMethodBody {
   billingAddress: CreatePaymentMethodBillingAddress;
 }
 
-/** Update payment method: API only updates billing address (AddressType). */
+/** Update payment method: API only updates billing address. */
 export interface UpdateCustomerPaymentMethodBillingAddress {
-  countryId: string;
+  countryId: number;
   street1: string;
   city: string;
   state: string;

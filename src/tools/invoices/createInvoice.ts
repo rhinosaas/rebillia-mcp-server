@@ -3,22 +3,23 @@ import type { Tool } from "../types.js";
 import type { Client } from "./helpers.js";
 import { errorResult, handleToolCall } from "./helpers.js";
 import * as invoiceService from "../../services/invoiceServices.js";
+import { mapShippingAddressInputToApiShippingAddress } from "../../types/addressInput.js";
+import { COUNTRY_CODE_DESCRIPTION_CONST } from "../../types/addressInput.js";
 
-/** Aligned with RebilliaServer AddressValidator: when address provided, contactName, street1, city, zip, countryId, type required. Empty object is treated as omitted. */
-const addressSchema = z
-  .object({
-    street1: z.string().min(1, "street1 is required"),
-    city: z.string().min(1, "city is required"),
-    zip: z.string().min(1, "zip is required"),
-    countryId: z.string().min(1, "countryId is required"),
-    contactName: z.string().min(1, "contactName is required"),
-    type: z.enum(["residential", "commercial"]),
-    street2: z.string().optional(),
-    state: z.string().optional(),
-    contactEmail: z.string().optional(),
-    contactPhone: z.string().optional(),
-    contactCompany: z.string().optional(),
-  });
+/** MCP-facing address: countryCode (ISO 3166-1 alpha-2). When provided, contactName, street1, city, zip, countryCode, type required. */
+const addressSchema = z.object({
+  street1: z.string().min(1, "street1 is required"),
+  city: z.string().min(1, "city is required"),
+  zip: z.string().min(1, "zip is required"),
+  countryCode: z.string().min(1, "countryCode is required"),
+  contactName: z.string().min(1, "contactName is required"),
+  type: z.enum(["residential", "commercial"]),
+  street2: z.string().optional(),
+  state: z.string().optional(),
+  contactEmail: z.string().optional(),
+  contactPhone: z.string().optional(),
+  contactCompany: z.string().optional(),
+});
 
 /** Strip empty address object so we don't require fields when user sends shippingAddress: {}. */
 function stripEmptyAddress(val: unknown): unknown {
@@ -62,7 +63,7 @@ const schema = z.object({
 const definition = {
   name: "create_invoice",
   description:
-    "Create an invoice. POST /invoices. Required: companyCurrencyId, companyGatewayId, customerId, paymentMethodId, detail (array, at least one line item). Optional: billingAddress, shippingAddress (when provided: contactName, street1, city, zip, countryId, type residential|commercial), customerEmail (max 45), customerName (max 45), customerPhone (max 45), paymentType (offlinePaymentProvider|thirdPartyPaymentProvider|walletPaymentProvider|otherPayment), dateDue, dateFrom, dateTo, shippingAmount (CENTS), terms (max 200), comments (max 200). Detail: amount as string '20.00' or number in cents (3000 = $30), description (max 255), qty. Omit shippingAddress or send full address; empty {} is ignored.",
+    "Create an invoice. POST /invoices. Required: companyCurrencyId, companyGatewayId, customerId, paymentMethodId, detail (array, at least one line item). Optional: billingAddress, shippingAddress (when provided: contactName, street1, city, zip, countryCode (ISO 3166-1 alpha-2), type residential|commercial), customerEmail (max 45), customerName (max 45), customerPhone (max 45), paymentType (offlinePaymentProvider|thirdPartyPaymentProvider|walletPaymentProvider|otherPayment), dateDue, dateFrom, dateTo, shippingAmount (CENTS), terms (max 200), comments (max 200). Detail: amount as string '20.00' or number in cents (3000 = $30), description (max 255), qty. Omit shippingAddress or send full address; empty {} is ignored.",
   inputSchema: {
     type: "object" as const,
     properties: {
@@ -87,7 +88,7 @@ const definition = {
       dateTo: { type: "string", description: "Period to (valid date)" },
       billingAddress: {
         type: "object",
-        description: "Optional. If provided: contactName, street1, city, zip, countryId, type (residential|commercial)",
+        description: `Optional. If provided: contactName, street1, city, zip, countryCode (${COUNTRY_CODE_DESCRIPTION_CONST}), type (residential|commercial)`,
       },
       shippingAddress: {
         type: "object",
@@ -116,12 +117,25 @@ async function handler(client: Client, args: Record<string, unknown> | undefined
     return errorResult(formatValidationErrors(parsed.error));
   }
   const raw = parsed.data;
-  const body = {
+  const detail = raw.detail.map((item) => ({
+    ...item,
+    amount: typeof item.amount === "number" ? (item.amount / 100).toFixed(2) : item.amount,
+  }));
+
+  let billingAddress: invoiceService.InvoiceAddressInput | undefined;
+  let shippingAddress: invoiceService.InvoiceAddressInput | undefined;
+  if (raw.billingAddress) {
+    billingAddress = await mapShippingAddressInputToApiShippingAddress(client, raw.billingAddress);
+  }
+  if (raw.shippingAddress) {
+    shippingAddress = await mapShippingAddressInputToApiShippingAddress(client, raw.shippingAddress);
+  }
+
+  const body: invoiceService.CreateInvoiceBody = {
     ...raw,
-    detail: raw.detail.map((item) => ({
-      ...item,
-      amount: typeof item.amount === "number" ? (item.amount / 100).toFixed(2) : item.amount,
-    })),
+    detail,
+    billingAddress,
+    shippingAddress,
   };
   return handleToolCall(() => invoiceService.createInvoice(client, body));
 }

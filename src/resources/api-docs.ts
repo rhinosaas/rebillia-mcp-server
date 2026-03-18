@@ -257,20 +257,56 @@ export function getDocContent(doc: DocKey): string | null {
   return resource ? resource.text : null;
 }
 
+/** MCP resource URI for countries list (id, code, name). Use for discoverability of valid countryCode values. */
+export const GLOBALS_COUNTRIES_URI = "rebillia://globals/countries";
+
+/** List of resources including optional globals/countries when client is provided */
+function getResourcesList(client?: InstanceType<typeof import("../client.js").default>) {
+  const list = getDocResourcesList();
+  if (client) {
+    list.push({
+      uri: GLOBALS_COUNTRIES_URI,
+      name: "Countries",
+      description: "Supported countries (id, code, name). Use code (ISO 3166-1 alpha-2) as countryCode in address tools.",
+      mimeType: "application/json",
+    });
+  }
+  return list;
+}
+
 /**
- * Register the 4 API documentation resources with the MCP server.
- * Call this with the server instance only (no client needed).
- * Resources appear in MCP Inspector Resources tab under rebillia://docs/*
+ * Register API documentation resources (and optionally globals/countries) with the MCP server.
+ * Pass client to enable the rebillia://globals/countries resource (fetched from upstream).
  */
-export function registerResources(server: Server): void {
+export function registerResources(
+  server: Server,
+  client?: InstanceType<typeof import("../client.js").default>
+): void {
   server.setRequestHandler(ListResourcesRequestSchema, async () => {
-    return { resources: getDocResourcesList() };
+    return { resources: getResourcesList(client) };
   });
 
   server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
-    const result = getDocResourceContent(request.params.uri);
+    const uri = request.params.uri;
+    if (uri === GLOBALS_COUNTRIES_URI) {
+      if (!client) {
+        throw new Error(`Resource not available: ${uri} (no API client)`);
+      }
+      const { getCountries } = await import("../services/countryResolverService.js");
+      const countries = await getCountries(client);
+      return {
+        contents: [
+          {
+            uri,
+            mimeType: "application/json",
+            text: JSON.stringify(countries, null, 2),
+          },
+        ],
+      };
+    }
+    const result = getDocResourceContent(uri);
     if (!result) {
-      throw new Error(`Resource not found: ${request.params.uri}`);
+      throw new Error(`Resource not found: ${uri}`);
     }
     return result;
   });

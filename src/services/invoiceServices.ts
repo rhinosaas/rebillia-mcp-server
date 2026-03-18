@@ -17,12 +17,12 @@ export interface ListInvoicesParams {
   pageNo?: number;
 }
 
-/** Billing/shipping address. When provided, AddressValidator requires: contactName, street1, city, zip, countryId, type (residential|commercial). */
+/** Billing/shipping address for upstream API (countryId resolved from countryCode by MCP layer). */
 export interface InvoiceAddressInput {
   street1: string;
   city: string;
   zip: string;
-  countryId: string;
+  countryId: number;
   contactName: string;
   type: "residential" | "commercial";
   street2?: string;

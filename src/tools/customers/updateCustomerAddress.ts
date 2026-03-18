@@ -3,18 +3,10 @@ import type { Tool } from "../types.js";
 import type { Client } from "./helpers.js";
 import { errorResult, handleToolCall } from "./helpers.js";
 import * as customerService from "../../services/customerServices.js";
+import { mapAddressInputToApiAddress } from "../../types/addressInput.js";
+import { COUNTRY_CODE_DESCRIPTION_CONST } from "../../types/addressInput.js";
 
-// Valid country IDs from https://api.rebillia.com/globals/countries (id: 1–250)
-const validCountryId = z
-  .string()
-  .min(1, "countryId is required")
-  .refine(
-    (val) => {
-      const n = parseInt(val, 10);
-      return Number.isInteger(n) && n >= 1 && n <= 250;
-    },
-    { message: "countryId must be a valid ID from https://api.rebillia.com/globals/countries (1-250)" }
-  );
+const COUNTRY_CODE_REGEX = /^[A-Za-z]{2}$/;
 
 const schema = z.object({
   customerId: z.string().min(1, "customerId is required"),
@@ -23,7 +15,11 @@ const schema = z.object({
   city: z.string().min(1, "city is required"),
   state: z.string().min(1, "state is required"),
   zip: z.string().min(1, "zip is required"),
-  countryId: validCountryId,
+  countryCode: z
+    .string()
+    .min(1, "countryCode is required")
+    .transform((s) => s.trim().toUpperCase())
+    .refine((s) => COUNTRY_CODE_REGEX.test(s), "countryCode must be ISO 3166-1 alpha-2 (e.g. ES, AR, MX)"),
   name: z.string().min(1).optional(),
   contactName: z.string().min(1).optional(),
   street2: z.string().optional(),
@@ -36,7 +32,7 @@ const schema = z.object({
 const definition = {
   name: "update_customer_address",
   description:
-    "Update an address book entry. PUT /customers/{customerId}/addressbooks/{addressId}. Required: customerId, addressId, street1, city, state, zip, countryId (valid IDs: https://api.rebillia.com/globals/countries). Optional: name, contactName, street2, company, contactEmail, contactPhone, type (residential|commercial).",
+    "Update an address book entry. PUT /customers/{customerId}/addressbooks/{addressId}. Required: customerId, addressId, street1, city, state, zip, countryCode (ISO 3166-1 alpha-2). Optional: name, contactName, street2, company, contactEmail, contactPhone, type (residential|commercial).",
   inputSchema: {
     type: "object" as const,
     properties: {
@@ -46,11 +42,7 @@ const definition = {
       city: { type: "string", description: "City (required)" },
       state: { type: "string", description: "State (required)" },
       zip: { type: "string", description: "Postal code (required)" },
-      countryId: {
-        type: "string",
-        description:
-          "Country ID (required). Valid IDs: https://api.rebillia.com/globals/countries (1-250)",
-      },
+      countryCode: { type: "string", description: COUNTRY_CODE_DESCRIPTION_CONST },
       name: { type: "string", description: "Address name" },
       contactName: { type: "string", description: "Contact name" },
       street2: { type: "string", description: "Street line 2" },
@@ -59,7 +51,7 @@ const definition = {
       contactPhone: { type: "string", description: "Contact phone" },
       type: { type: "string", description: "Address type: residential or commercial" },
     },
-    required: ["customerId", "addressId", "street1", "city", "state", "zip", "countryId"],
+    required: ["customerId", "addressId", "street1", "city", "state", "zip", "countryCode"],
   },
 };
 
@@ -68,7 +60,22 @@ async function handler(client: Client, args: Record<string, unknown> | undefined
   if (!parsed.success) {
     return errorResult(parsed.error.errors.map((e) => `${e.path.join(".")}: ${e.message}`).join("; "));
   }
-  const { customerId, addressId, ...body } = parsed.data;
+  const { customerId, addressId, ...rest } = parsed.data;
+  const apiAddress = await mapAddressInputToApiAddress(client, { ...rest, type: rest.type ?? "residential" });
+  const body: customerService.UpdateCustomerAddressBody = {
+    street1: apiAddress.street1,
+    city: apiAddress.city,
+    state: apiAddress.state,
+    zip: apiAddress.zip,
+    countryId: apiAddress.countryId,
+    name: rest.name,
+    contactName: rest.contactName,
+    street2: rest.street2,
+    company: rest.company,
+    contactEmail: rest.contactEmail,
+    contactPhone: rest.contactPhone,
+    type: rest.type,
+  };
   return handleToolCall(() =>
     customerService.updateCustomerAddress(client, customerId, addressId, body)
   );

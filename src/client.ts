@@ -11,6 +11,13 @@ export default class RebilliaClient {
   }
 
   /**
+   * Root base URL without trailing /v1 (some endpoints like /globals/* are not versioned).
+   */
+  private rootBaseUrl(): string {
+    return this.baseUrl.replace(/\/v1\/?$/, "");
+  }
+
+  /**
    * Authenticate API requests with X-AUTH-TOKEN header
    */
   private authenticate(): Record<string, string> {
@@ -41,6 +48,23 @@ export default class RebilliaClient {
    */
   async get<T = any>(endpoint: string): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
+    const response = await fetch(url, {
+      method: "GET",
+      headers: this.authenticate(),
+    });
+
+    if (!response.ok) {
+      await this.handleError(response);
+    }
+
+    return response.json() as Promise<T>;
+  }
+
+  /**
+   * GET request against API root (no /v1). Use for endpoints like /globals/countries.
+   */
+  async getRoot<T = any>(endpoint: string): Promise<T> {
+    const url = `${this.rootBaseUrl()}${endpoint}`;
     const response = await fetch(url, {
       method: "GET",
       headers: this.authenticate(),

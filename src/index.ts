@@ -51,7 +51,7 @@ const server = new Server(
 // Resources (rebillia://docs/* – overview, models, subscription-statuses, charge-types)
 // ============================================================================
 
-registerResources(server);
+registerResources(server, rebilliaClient);
 
 // ============================================================================
 // Handle tools/list
