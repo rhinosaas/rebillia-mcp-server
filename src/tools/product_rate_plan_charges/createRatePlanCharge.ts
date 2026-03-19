@@ -61,7 +61,7 @@ const schema = z.object({
 });
 
 const definition = {
-  name: "create_rate_plan_charge",
+  name: "create_product_rate_plan_charge",
   description:
     "Create a rate plan charge. POST /product-rateplan-charges. Required: ratePlanId (rate plan reference, URI: /product-rateplans/{ratePlanId}), name, chargeType (oneTime|recurring|usage), chargeModel (flatFeePricing|perUnitPricing|tieredPricing|volumePricing), billCycleType, category (physical|digital), chargeTier (array of {currency ex. 'USD', price in cents, optional startingUnit, endingUnit, priceFormat, tier}), taxable, weight. Optional: billingPeriod (day|week|month|year), billingTiming (inAdvance|inArrears), description, etc.",
   inputSchema: {

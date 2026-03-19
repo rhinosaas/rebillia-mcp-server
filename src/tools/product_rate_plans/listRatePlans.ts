@@ -14,9 +14,9 @@ const schema = z.object({
 });
 
 const definition = {
-  name: "list_rate_plans",
+  name: "list_product_rate_plans",
   description:
-    "List rate plans for a product. GET /products/{productId}/product-rateplans. Product reference: productId (URI: /products/{productId}). Optional: include, orderBy, sortBy, pageNo, itemPerPage.",
+    "List product rate plans for a product. GET /products/{productId}/product-rateplans. Product reference: productId (URI: /products/{productId}). Optional: include, orderBy, sortBy, pageNo, itemPerPage.",
   inputSchema: {
     type: "object" as const,
     properties: {

@@ -10,7 +10,7 @@ const schema = z.object({
 });
 
 const definition = {
-  name: "get_rate_plan_charge",
+  name: "get_product_rate_plan_charge",
   description: "Get a rate plan charge by ID. GET /product-rateplan-charges/{chargeId}.",
   inputSchema: {
     type: "object" as const,

@@ -9,7 +9,7 @@ const schema = z.object({
 });
 
 const definition = {
-  name: "delete_rate_plan",
+  name: "delete_product_rate_plan",
   description: "Delete a rate plan. DELETE /product-rateplans/{ratePlanId}.",
   inputSchema: {
     type: "object" as const,

@@ -7,9 +7,9 @@ Model Context Protocol (MCP) server for the [Rebillia Public API](https://apigui
 - **Tools** – Call Rebillia endpoints from your MCP client (e.g. Cursor, Claude Desktop):
   - **Customers** (21 tools) – List, get, create, update, delete; invoices, subscriptions, logs; addresses and payment methods; charges/credits
   - **Products** (8 tools) – List, get, create, update, delete; update status; link/unlink external products
-  - **Rate plans** (7 tools) – List by product, get, create, update, delete; update status; sync
-  - **Rate plan charges** (5 tools) – List by rate plan, get, create, update, delete (with chargeType, chargeModel, billingPeriod, billingTiming enums and chargeTier array)
-  - **Subscriptions** (20 tools) – List, get, create, update, delete; status; next bill, upcoming charges, invoices, logs, external invoices; rate plans and rate plan charges (add/update/remove)
+  - **Product rate plans** (7 tools) – List by product, get, create, update, delete; update status; sync
+  - **Product rate plan charges** (5 tools) – List by product rate plan, get, create, update, delete (with chargeType, chargeModel, billingPeriod, billingTiming enums and chargeTier array)
+  - **Subscriptions** (20 tools) – List, get, create, update, delete; status; next bill, upcoming charges, invoices, logs, external invoices; subscription rate plans and rate plan charges (add/update/remove)
   - **Invoices** (8 tools) – List, get, create, update, delete; charge (card/online with paymentType), charge_external (offline), void
   - **Transactions** (4 tools) – List, get, refund (amount in **cents**), void (before settlement only)
   - **Bill runs** (4 tools) – List (filter by completed/pending/error), get, update (newDateTime, ISO 8601), get bill run invoices
@@ -193,32 +193,32 @@ Responses are JSON from the Rebillia Public API (paginated for list endpoints, s
 | `get_product` | Get product by ID. |
 | `create_product` | Create product (name, category, optional description, sku). |
 | `update_product` | Update product by ID. |
-| `delete_product` | Delete product by ID (cascades to rate plans). |
+| `delete_product` | Delete product by ID (cascades to product rate plans). |
 | `update_product_status` | Update status (published, archived, disabled). |
 | `link_external_product` | Link external product (productId, companyIntegrationId, external productId, settings). |
 | `unlink_external_product` | Unlink external product by ID. |
 
-#### Rate plans (7 tools)
+#### Product rate plans (7 tools)
 
 | Tool | Description |
 |------|-------------|
-| `list_rate_plans` | List rate plans for a product (GET /products/{productId}/product-rateplans). |
-| `get_rate_plan` | Get rate plan by ID. |
-| `create_rate_plan` | Create rate plan (productId, name, type: contract\|ongoing\|prepaid). |
-| `update_rate_plan` | Update rate plan by ID. |
-| `delete_rate_plan` | Delete rate plan by ID. |
-| `update_rate_plan_status` | Update status (published, archived, disabled, discontinue). |
-| `sync_rate_plan` | Sync rate plan (POST …/sync). |
+| `list_product_rate_plans` | List product rate plans for a product (GET /products/{productId}/product-rateplans). |
+| `get_product_rate_plan` | Get product rate plan by ID. |
+| `create_product_rate_plan` | Create product rate plan (productId, name, type: contract\|ongoing\|prepaid). |
+| `update_product_rate_plan` | Update product rate plan by ID. |
+| `delete_product_rate_plan` | Delete product rate plan by ID. |
+| `update_product_rate_plan_status` | Update status (published, archived, disabled, discontinue). |
+| `sync_product_rate_plan` | Sync product rate plan (POST …/sync). |
 
-#### Rate plan charges (5 tools)
+#### Product rate plan charges (5 tools)
 
 | Tool | Description |
 |------|-------------|
-| `list_rate_plan_charges` | List charges for a rate plan (GET …/product-rateplan-charges). |
-| `get_rate_plan_charge` | Get charge by ID. |
-| `create_rate_plan_charge` | Create charge (ratePlanId, name, chargeType, chargeModel, billCycleType, category, **chargeTier** array, taxable, weight, endDateCondition, …). Enums: chargeType (oneTime, recurring, usage), chargeModel (flatFeePricing, perUnitPricing, tieredPricing, volumePricing), billingPeriod (day, week, month, year), billingTiming (inAdvance, inArrears). |
-| `update_rate_plan_charge` | Update charge by ID. |
-| `delete_rate_plan_charge` | Delete charge by ID. |
+| `list_product_rate_plan_charges` | List product rate plan charges for a product rate plan (GET …/product-rateplan-charges). |
+| `get_product_rate_plan_charge` | Get product rate plan charge by ID. |
+| `create_product_rate_plan_charge` | Create product rate plan charge (ratePlanId, name, chargeType, chargeModel, billCycleType, category, **chargeTier** array, taxable, weight, endDateCondition, …). Enums: chargeType (oneTime, recurring, usage), chargeModel (flatFeePricing, perUnitPricing, tieredPricing, volumePricing), billingPeriod (day, week, month, year), billingTiming (inAdvance, inArrears). |
+| `update_product_rate_plan_charge` | Update product rate plan charge by ID. |
+| `delete_product_rate_plan_charge` | Delete product rate plan charge by ID. |
 
 #### Subscriptions (20 tools)
 
@@ -379,8 +379,8 @@ mcp/
 │   │   ├── types.ts          # Tool definition and handler types
 │   │   ├── customers/        # Customer tools (21)
 │   │   ├── products/         # Product tools (8)
-│   │   ├── product_rate_plans/        # Rate plan tools (7)
-│   │   ├── product_rate_plan_charges/# Rate plan charge tools (5)
+│   │   ├── product_rate_plans/        # Product rate plan tools (7)
+│   │   ├── product_rate_plan_charges/# Product rate plan charge tools (5)
 │   │   ├── subscriptions/   # Subscription tools (20)
 │   │   ├── invoices/         # Invoice tools (8)
 │   │   ├── transactions/     # Transaction tools (4)

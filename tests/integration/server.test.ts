@@ -130,8 +130,8 @@ describe("MCP server integration", () => {
       const categoryTools: Array<{ name: string; args: Record<string, unknown> }> = [
         { name: "list_customers", args: {} },
         { name: "list_products", args: {} },
-        { name: "list_rate_plans", args: { productId: "1" } },
-        { name: "list_rate_plan_charges", args: { ratePlanId: "1" } },
+        { name: "list_product_rate_plans", args: { productId: "1" } },
+        { name: "list_product_rate_plan_charges", args: { ratePlanId: "1" } },
         { name: "list_subscriptions", args: {} },
         { name: "list_invoices", args: {} },
         { name: "list_transactions", args: {} },

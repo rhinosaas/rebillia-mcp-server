@@ -22,7 +22,7 @@ const schema = z.object({
 });
 
 const definition = {
-  name: "create_rate_plan",
+  name: "create_product_rate_plan",
   description:
     "Create a rate plan. POST /product-rateplans. Required: productId (product reference, URI: /products/{productId}), name, type (contract|ongoing|prepaid). Optional: description, effectiveStartDate, effectiveEndDate, minimumCommitment, image.",
   inputSchema: {

@@ -87,9 +87,85 @@ export interface UpdateRatePlanChargeBody {
   taxable?: boolean;
   weight?: number;
   description?: string;
+  endDateCondition?: "subscriptionEnd" | "fixedPeriod";
   billingPeriod?: BillingPeriod;
   billingTiming?: BillingTiming;
+  billingPeriodAlignment?: string;
+  specificBillingPeriod?: number;
+  billCycleDay?: number;
+  weeklyBillCycleDay?: string;
+  monthlyBillCycleYear?: number;
   [k: string]: unknown;
+}
+
+/** Keys that the backend requires for PUT (Backend Collection). Used to build merge body from GET response. */
+const PUT_BODY_KEYS = [
+  "name",
+  "chargeType",
+  "chargeModel",
+  "billCycleType",
+  "category",
+  "chargeTier",
+  "taxable",
+  "weight",
+  "description",
+  "endDateCondition",
+  "billingPeriod",
+  "billingTiming",
+  "billingPeriodAlignment",
+  "specificBillingPeriod",
+  "billCycleDay",
+  "weeklyBillCycleDay",
+  "monthlyBillCycleYear",
+] as const;
+
+const SNAKE_TO_CAMEL: Record<string, (typeof PUT_BODY_KEYS)[number]> = {
+  bill_cycle_type: "billCycleType",
+  bill_cycle_day: "billCycleDay",
+  weekly_bill_cycle_day: "weeklyBillCycleDay",
+  monthly_bill_cycle_year: "monthlyBillCycleYear",
+  charge_type: "chargeType",
+  charge_model: "chargeModel",
+  charge_tier: "chargeTier",
+  end_date_condition: "endDateCondition",
+  billing_period: "billingPeriod",
+  billing_timing: "billingTiming",
+  billing_period_alignment: "billingPeriodAlignment",
+  specific_billing_period: "specificBillingPeriod",
+};
+
+/**
+ * Normalize GET /product-rateplan-charges/{id} response into a partial UpdateRatePlanChargeBody
+ * so it can be merged with user payload. Handles camelCase or snake_case; extracts chargeTier and ensures priceFormat.
+ */
+export function existingChargeToUpdateBody(existing: unknown): Partial<UpdateRatePlanChargeBody> {
+  if (!existing || typeof existing !== "object") return {};
+  const o = existing as Record<string, unknown>;
+  const out: Record<string, unknown> = {};
+  const allKeys = [...PUT_BODY_KEYS];
+  for (const camel of allKeys) {
+    let v = o[camel];
+    if (v === undefined) {
+      const snake = Object.entries(SNAKE_TO_CAMEL).find(([, c]) => c === camel)?.[0];
+      if (snake) v = o[snake];
+    }
+    if (v === undefined) continue;
+    if (camel === "chargeTier" && Array.isArray(v)) {
+      out[camel] = (v as Record<string, unknown>[]).map((t) => ({
+        currency: t.currency ?? t.iso3 ?? "",
+        startingUnit: t.startingUnit ?? t.starting_unit,
+        endingUnit: t.endingUnit ?? t.ending_unit,
+        price: typeof t.price === "number" ? t.price : 0,
+        priceFormat: typeof (t.priceFormat ?? t.price_format) === "string" ? (t.priceFormat ?? t.price_format) : "",
+        tier: typeof t.tier === "number" ? t.tier : undefined,
+      }));
+    } else if (camel === "weight" && (typeof v === "number" || typeof v === "string")) {
+      out[camel] = Number(v);
+    } else {
+      out[camel] = v;
+    }
+  }
+  return out as Partial<UpdateRatePlanChargeBody>;
 }
 
 export async function listRatePlanCharges(

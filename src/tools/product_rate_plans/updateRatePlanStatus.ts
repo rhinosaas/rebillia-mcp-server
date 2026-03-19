@@ -14,7 +14,7 @@ const schema = z.object({
 });
 
 const definition = {
-  name: "update_rate_plan_status",
+  name: "update_product_rate_plan_status",
   description:
     "Update a rate plan status. PUT /product-rateplans/{ratePlanId}/status. Required: status. Valid values: published, archived, disabled, discontinue.",
   inputSchema: {

@@ -9,7 +9,7 @@ const schema = z.object({
 });
 
 const definition = {
-  name: "sync_rate_plan",
+  name: "sync_product_rate_plan",
   description: "Sync a rate plan. POST /product-rateplans/{ratePlanId}/sync.",
   inputSchema: {
     type: "object" as const,

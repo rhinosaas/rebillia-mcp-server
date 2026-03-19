@@ -14,13 +14,13 @@ const schema = z.object({
 });
 
 const definition = {
-  name: "list_rate_plan_charges",
+  name: "list_product_rate_plan_charges",
   description:
-    "List rate plan charges for a rate plan. GET /product-rateplans/{ratePlanId}/product-rateplan-charges. Rate plan reference: ratePlanId (URI: /product-rateplans/{ratePlanId}). Optional: include, orderBy, sortBy, pageNo, itemPerPage.",
+    "List product rate plan charges for a product rate plan. GET /product-rateplans/{ratePlanId}/product-rateplan-charges. Product rate plan reference: ratePlanId (URI: /product-rateplans/{ratePlanId}). Optional: include, orderBy, sortBy, pageNo, itemPerPage.",
   inputSchema: {
     type: "object" as const,
     properties: {
-      ratePlanId: { type: "string", description: "Rate plan ID (URI: /product-rateplans/{ratePlanId})" },
+      ratePlanId: { type: "string", description: "Product rate plan ID (URI: /product-rateplans/{ratePlanId})" },
       include: { type: "string", description: "Attributes to include" },
       orderBy: { type: "string", description: "Sort column" },
       sortBy: { type: "string", description: "Sort direction" },

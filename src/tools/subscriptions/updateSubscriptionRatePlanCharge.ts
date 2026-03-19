@@ -17,9 +17,52 @@ const billCycleTypeEnum = [
 ] as const;
 const endDateConditionEnum = ["subscriptionEnd", "fixedPeriod"] as const;
 
+function moneyStringToCents(input: string): number {
+  const s = input.trim();
+  if (s.includes(".")) {
+    if (!/^\d+(\.\d{1,2})$/.test(s)) {
+      throw new Error(
+        `Invalid price string "${input}". Expected a number like "41.00" (up to 2 decimals).`
+      );
+    }
+    const [whole, frac] = s.split(".");
+    const cents = Number(whole) * 100 + Number((frac + "00").slice(0, 2));
+    return cents;
+  }
+  if (!/^\d+$/.test(s)) {
+    throw new Error(
+      `Invalid price string "${input}". Expected "41.00" or integer cents like "4100".`
+    );
+  }
+  return Number(s);
+}
+
+function normalizePriceToCents(amount: unknown): number {
+  if (typeof amount === "number") {
+    if (amount < 0 || !Number.isFinite(amount)) {
+      throw new Error("price must be a non-negative number");
+    }
+    // Integer → treat as cents; float (e.g. 48.52) → treat as dollars, convert to cents
+    if (Number.isInteger(amount)) return amount;
+    return Math.round(amount * 100);
+  }
+  if (typeof amount === "string") {
+    return moneyStringToCents(amount);
+  }
+  throw new Error(
+    "price must be a number (cents or dollars, e.g. 4852 or 48.52) or string (e.g. '41.00' or '4100')"
+  );
+}
+
 const chargeTierItemSchema = z.object({
   currency: z.string().min(1, "chargeTier[].currency is required"),
-  price: z.number().int().min(0, "chargeTier[].price is required"),
+  price: z.union([
+    z.string().min(
+      1,
+      "chargeTier[].price must be a non-empty string (e.g. '41.00' or '4100')"
+    ),
+    z.number().min(0, "chargeTier[].price must be a non-negative number (dollars e.g. 48.52 or cents e.g. 4852)"),
+  ]),
   startingUnit: z.coerce.string().optional(),
   endingUnit: z.coerce.string().optional(),
   priceFormat: z.string().optional(),
@@ -70,7 +113,7 @@ const schema = z
 const definition = {
   name: "update_subscription_rate_plan_charge",
   description:
-    "Update a rate plan charge on a subscription. PUT /subscriptions/{subscriptionId}/rateplan-charges/{chargeId}. Required: subscriptionId, chargeId, quantity, name, chargeModel (flatFeePricing|perUnitPricing|tieredPricing|volumePricing), billCycleType, chargeTier (array: currency, price required), chargeType (oneTime|recurring|usage), endDateCondition (subscriptionEnd|fixedPeriod), taxable (boolean), weight. When chargeType is recurring, billingPeriodAlignment is also required. Optional: billingPeriod, billingTiming, specificBillingPeriod.",
+    "Update a rate plan charge on a subscription. PUT /subscriptions/{subscriptionId}/rateplan-charges/{chargeId}. Required: subscriptionId, chargeId, quantity, name, chargeModel (flatFeePricing|perUnitPricing|tieredPricing|volumePricing), billCycleType, chargeTier (array: currency, price required). For price, you can pass a string dollars '41.00' or integer cents 4100 – the tool always sends cents to the API (same logic as create_invoice detail.amount). Also required: chargeType (oneTime|recurring|usage), endDateCondition (subscriptionEnd|fixedPeriod), taxable (boolean), weight. When chargeType is recurring, billingPeriodAlignment is also required. Optional: billingPeriod, billingTiming, specificBillingPeriod.",
   inputSchema: {
     type: "object" as const,
     properties: {
@@ -100,12 +143,16 @@ const definition = {
       chargeTier: {
         type: "array",
         description:
-          "Required. Array of tiers: currency (required), price (required, e.g. cents), optional startingUnit, endingUnit, priceFormat, tier",
+          "Required. Array of tiers: currency (required), price (required as '41.00' (dollars) or 4100 (cents); tool always sends cents to API), optional startingUnit, endingUnit, priceFormat, tier",
         items: {
           type: "object",
           properties: {
             currency: { type: "string", description: "Required" },
-            price: { type: "number", description: "Required (e.g. cents)" },
+            price: {
+              type: "number",
+              description:
+                "Required. Pass dollars as number (e.g. 48.52) or string (e.g. '41.00'), or cents as integer (e.g. 4852); tool sends integer cents to API.",
+            },
             startingUnit: { type: "string", description: "Optional" },
             endingUnit: { type: "string", description: "Optional" },
             priceFormat: { type: "string", description: "Optional" },
@@ -155,7 +202,20 @@ async function handler(client: Client, args: Record<string, unknown> | undefined
   if (!parsed.success) {
     return errorResult(parsed.error.errors.map((e) => e.message).join("; "));
   }
-  const { subscriptionId, chargeId, ...body } = parsed.data;
+  const { subscriptionId, chargeId, chargeTier, ...rest } = parsed.data;
+
+  const normalizedChargeTier =
+    chargeTier?.map((tier) => ({
+      ...tier,
+      // Normalize price like create_invoice detail.amount: accept '41.00' or 4100, always send cents
+      price: normalizePriceToCents(tier.price),
+    })) ?? undefined;
+
+  const body = {
+    ...rest,
+    chargeTier: normalizedChargeTier,
+  };
+
   return handleToolCall(() =>
     subscriptionService.updateSubscriptionRatePlanCharge(client, subscriptionId, chargeId, body)
   );
