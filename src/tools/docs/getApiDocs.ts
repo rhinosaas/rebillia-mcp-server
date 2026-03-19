@@ -11,14 +11,14 @@ const schema = z.object({
 const definition = {
   name: "get_api_docs",
   description:
-    "Get Rebillia API documentation as markdown. Returns the overview by default so Claude can read base URLs, auth, pagination, dates, amounts without fetching external URLs. Optional: doc (overview | models | subscription-statuses | charge-types).",
+    "Get Rebillia API documentation as markdown. Returns the overview by default so Claude can read base URLs, auth, pagination, dates, amounts without fetching external URLs. Optional: doc (overview | models | subscription-statuses | charge-types | gateways).",
   inputSchema: {
     type: "object" as const,
     properties: {
       doc: {
         type: "string",
         description:
-          "Which doc to return. Default: overview. Options: overview, models, subscription-statuses, charge-types",
+          "Which doc to return. Default: overview. Options: overview, models, subscription-statuses, charge-types, gateways",
       },
     },
     required: [],

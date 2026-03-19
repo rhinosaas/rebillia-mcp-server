@@ -13,13 +13,13 @@ Model Context Protocol (MCP) server for the [Rebillia Public API](https://apigui
   - **Invoices** (8 tools) – List, get, create, update, delete; charge (card/online with paymentType), charge_external (offline), void
   - **Transactions** (4 tools) – List, get, refund (amount in **cents**), void (before settlement only)
   - **Bill runs** (4 tools) – List (filter by completed/pending/error), get, update (newDateTime, ISO 8601), get bill run invoices
-- **Gateways** (8 tools) – List, get, create, update, delete, test gateway, get client token, create setup intent
+- **Gateways** (9 tools) – List global gateways (discover gblGatewayId and required setting keys), list company gateways, get, create, update, delete, test gateway, get client token, create setup intent
 - **Currencies** (7 tools) – List, get, create, update, delete, get/set default currency
 - **Integrations** (8 tools) – List, get config, get/list by key; external invoices, products, order statuses
 - **Shipping** (2 tools) – List shipping services, calculate shipping
 - **Filters** (4 tools) – List filters (section required), create filter, list filter fields, remove filter
 - **Documentation** (1 tool) – `get_api_docs` returns overview or other API docs as markdown (no external fetch)
-- **Resources** – API docs via MCP resources (`rebillia://docs/*`): overview, models, subscription-statuses, charge-types. Country list at `rebillia://globals/countries` (id, code, name) for use with address tools. All docs are self-contained; use these or the tool instead of fetching external URLs.
+- **Resources** – API docs via MCP resources (`rebillia://docs/*`): overview, models, subscription-statuses, charge-types, gateways. Country list at `rebillia://globals/countries` (id, code, name) for address tools. Global gateways at `rebillia://globals/gateways` (gblGatewayId, requiredFields) for gateway creation. All docs are self-contained; use these or the tool instead of fetching external URLs.
 - **Types** – TypeScript types aligned with the Rebillia Public API response shapes
 
 ## Requirements
@@ -276,18 +276,21 @@ Responses are JSON from the Rebillia Public API (paginated for list endpoints, s
 | `update_bill_run` | Update bill run schedule. Required: billRunId, newDateTime (ISO 8601, e.g. 2026-02-26T20:05:00Z). |
 | `get_bill_run_invoices` | Get invoices for a bill run. |
 
-#### Gateways (8 tools)
+#### Gateways (9 tools)
 
 | Tool | Description |
 |------|-------------|
+| `list_global_gateways` | List available global gateway types (e.g. Stripe, Braintree). Returns **gblGatewayId**, name, keyName, **requiredFields** (setting keys), and fieldDetails. Call this before `create_gateway` to discover valid gateway IDs and which keys to pass in `setting`. |
 | `list_gateways` | List company gateways. |
 | `get_gateway` | Get gateway by ID. |
-| `create_gateway` | Create gateway (gblGatewayId, name, setting credentials). |
+| `create_gateway` | Create gateway. Required: **gblGatewayId** (from `list_global_gateways`), **setting** (object with keys from that gateway’s `requiredFields`). Optional: displayName, card, paymentMethod. Use `list_global_gateways` first to get gblGatewayId and required credential field names. |
 | `update_gateway` | Update gateway by ID. |
 | `delete_gateway` | Delete gateway by ID. |
 | `test_gateway` | Test gateway connection. |
 | `get_client_token` | Get the gateway client credential to initialize your payment integration and produce a **paymentMethodNonce** for create_customer_payment_method. Gateway-agnostic. Required: gatewayId. Optional: customerId; **required for PayFabric**, optional for others. |
 | `create_setup_intent` | Create/retrieve a setup intent via `/gateways/{companyGatewayId}/customers/{customerId}/setup_intent`. Use setupIntent.id as **paymentMethodNonce** for create_customer_payment_method (gateway-agnostic payment flow). |
+
+**Gateway creation example flow:** (1) Call `list_global_gateways` (no args). (2) Pick a gateway (e.g. Stripe, Braintree) and note its `gblGatewayId` and `requiredFields`. (3) Build a `setting` object with those keys and your credential values. (4) Call `create_gateway` with that `gblGatewayId` and `setting`. See `rebillia://docs/gateways` or `get_api_docs` with `doc: "gateways"` for full details.
 
 #### Currencies (7 tools)
 
@@ -334,7 +337,7 @@ Responses are JSON from the Rebillia Public API (paginated for list endpoints, s
 
 | Tool | Description |
 |------|-------------|
-| `get_api_docs` | Get Rebillia API documentation as markdown. Default: overview (base URLs, auth, pagination, dates, amounts). Optional: doc = overview \| models \| subscription-statuses \| charge-types. Use this so Claude can read docs without fetching external URLs. |
+| `get_api_docs` | Get Rebillia API documentation as markdown. Default: overview (base URLs, auth, pagination, dates, amounts). Optional: doc = overview \| models \| subscription-statuses \| charge-types \| gateways. Use this so Claude can read docs without fetching external URLs. |
 
 ### Resources
 
@@ -346,6 +349,8 @@ API documentation is exposed as MCP resources under `rebillia://docs/*`. Use `re
 | `rebillia://docs/models` | Domain model hierarchy and relationships |
 | `rebillia://docs/subscription-statuses` | Subscription statuses: active, paused, archived, requestPayment |
 | `rebillia://docs/charge-types` | chargeType, chargeModel, billingPeriod, billingTiming enums |
+| `rebillia://docs/gateways` | Gateway creation flow: use `list_global_gateways` to discover gblGatewayId and requiredFields, then build `setting` and call `create_gateway` |
+| `rebillia://globals/gateways` | Global gateways list (when client provided): gblGatewayId, name, keyName, requiredFields, fieldDetails – use with `create_gateway` |
 
 ## Project structure
 

@@ -83,6 +83,7 @@ List endpoints return a paginated shape:
 | Data models | \`rebillia://docs/models\` | Domain model hierarchy and relationships |
 | Subscription statuses | \`rebillia://docs/subscription-statuses\` | active, paused, archived, requestPayment |
 | Charge types | \`rebillia://docs/charge-types\` | chargeType, chargeModel, billingPeriod, billingTiming |
+| Gateways | \`rebillia://docs/gateways\` | list_global_gateways + create_gateway flow (gblGatewayId, setting) |
 `,
   },
   {
@@ -214,6 +215,59 @@ Used for recurring charges (e.g. \`recurring\` chargeType).
 - **Subscription rate plan charges:** Inherit from product rate plan charge; quantity and overrides per subscription.
 `,
   },
+  {
+    uri: `${DOCS_URI_PREFIX}gateways`,
+    name: "rebillia-gateways",
+    description: "Gateway creation flow: list_global_gateways and create_gateway (gblGatewayId, setting)",
+    mimeType: "text/markdown",
+    text: `# Rebillia – Gateway creation (list_global_gateways + create_gateway)
+
+Use the MCP tools to discover available gateway types and their required credentials, then create a company gateway.
+
+## list_global_gateways
+
+**Tool:** \`list_global_gateways\`  
+**Endpoint:** \`GET /globals/gateways\` (no \`/v1\` prefix, same as \`/globals/countries\`).
+
+Returns available global gateway types (e.g. Stripe, Braintree). Each item includes:
+
+| Field | Description |
+|-------|-------------|
+| \`gblGatewayId\` | Use this as \`gblGatewayId\` in \`create_gateway\`. |
+| \`name\` | Human-readable gateway name. |
+| \`keyName\` | Internal key (e.g. \`stripe\`, \`braintree\`). |
+| \`requiredFields\` | Array of setting key names (e.g. \`publicKey\`, \`privateKey\`, \`merchantId\`). Build the \`setting\` object with these keys. |
+| \`fieldDetails\` | Optional array of \`{ keyName, displayName }\` for better UX when prompting for credentials. |
+
+## create_gateway
+
+**Tool:** \`create_gateway\`  
+**Endpoint:** \`POST /v1/gateways\`.
+
+**Required:** \`gblGatewayId\`, \`setting\` (object with credential key-value pairs).  
+**Optional:** \`displayName\`, \`card\` (array of card type IDs), \`paymentMethod\`.
+
+The \`setting\` object must contain one key per \`requiredFields\` from the chosen global gateway. Keys are the field names (e.g. \`publicKey\`, \`privateKey\`); values are strings or numbers (your API keys, merchant ID, etc.).
+
+## Example flow
+
+1. **Call \`list_global_gateways\`** – no parameters.
+2. **Pick a gateway** – e.g. Stripe or Braintree from the returned list. Note its \`gblGatewayId\` and \`requiredFields\` (or \`fieldDetails\`).
+3. **Build \`setting\`** – create an object with one entry per required field:
+   - Keys = \`requiredFields\` (e.g. \`publicKey\`, \`privateKey\`).
+   - Values = the user's or company's credential values (strings/numbers).
+4. **Call \`create_gateway\`** with \`gblGatewayId\` from step 2 and the \`setting\` object from step 3. Optionally set \`displayName\`.
+
+Example (pseudo):
+
+\`\`\`
+list_global_gateways() → e.g. { gblGatewayId: 1, name: "Stripe", requiredFields: ["publicKey", "privateKey"] }
+create_gateway({ gblGatewayId: 1, setting: { publicKey: "pk_...", privateKey: "sk_..." } })
+\`\`\`
+
+No hardcoded gateway IDs or credential field names are needed; everything is discovered via \`list_global_gateways\`.
+`,
+  },
 ];
 
 /** List shape for MCP resources/list */
@@ -247,7 +301,7 @@ function getDocResourceContent(uri: string): { contents: Array<{ uri: string; mi
 }
 
 /** Doc keys supported by get_api_docs tool */
-export const DOC_KEYS = ["overview", "models", "subscription-statuses", "charge-types"] as const;
+export const DOC_KEYS = ["overview", "models", "subscription-statuses", "charge-types", "gateways"] as const;
 export type DocKey = (typeof DOC_KEYS)[number];
 
 /** Get documentation markdown by key (for get_api_docs tool). Returns null if key unknown. */
@@ -260,16 +314,27 @@ export function getDocContent(doc: DocKey): string | null {
 /** MCP resource URI for countries list (id, code, name). Use for discoverability of valid countryCode values. */
 export const GLOBALS_COUNTRIES_URI = "rebillia://globals/countries";
 
-/** List of resources including optional globals/countries when client is provided */
+/** MCP resource URI for global gateways list (gblGatewayId, name, requiredFields). Use before create_gateway. */
+export const GLOBALS_GATEWAYS_URI = "rebillia://globals/gateways";
+
+/** List of resources including optional globals (countries, gateways) when client is provided */
 function getResourcesList(client?: InstanceType<typeof import("../client.js").default>) {
   const list = getDocResourcesList();
   if (client) {
-    list.push({
-      uri: GLOBALS_COUNTRIES_URI,
-      name: "Countries",
-      description: "Supported countries (id, code, name). Use code (ISO 3166-1 alpha-2) as countryCode in address tools.",
-      mimeType: "application/json",
-    });
+    list.push(
+      {
+        uri: GLOBALS_COUNTRIES_URI,
+        name: "Countries",
+        description: "Supported countries (id, code, name). Use code (ISO 3166-1 alpha-2) as countryCode in address tools.",
+        mimeType: "application/json",
+      },
+      {
+        uri: GLOBALS_GATEWAYS_URI,
+        name: "Global gateways",
+        description: "Available gateway types (gblGatewayId, name, keyName, requiredFields, fieldDetails). Use with create_gateway.",
+        mimeType: "application/json",
+      }
+    );
   }
   return list;
 }
@@ -300,6 +365,22 @@ export function registerResources(
             uri,
             mimeType: "application/json",
             text: JSON.stringify(countries, null, 2),
+          },
+        ],
+      };
+    }
+    if (uri === GLOBALS_GATEWAYS_URI) {
+      if (!client) {
+        throw new Error(`Resource not available: ${uri} (no API client)`);
+      }
+      const { listGlobalGateways } = await import("../services/globalGatewayService.js");
+      const gateways = await listGlobalGateways(client);
+      return {
+        contents: [
+          {
+            uri,
+            mimeType: "application/json",
+            text: JSON.stringify(gateways, null, 2),
           },
         ],
       };

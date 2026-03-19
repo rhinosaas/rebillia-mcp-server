@@ -18,16 +18,20 @@ const schema = z.object({
 const definition = {
   name: "create_gateway",
   description:
-    "Create a company gateway. POST /gateways. Required: gblGatewayId, setting (object with credential keys, e.g. publicKey, privateKey, merchantId). Optional: displayName, card (array of card type IDs), paymentMethod.",
+    "Create a company gateway. POST /gateways. Required: gblGatewayId, setting (credentials object). Optional: displayName, card (array of card type IDs), paymentMethod. Use list_global_gateways first to discover valid gblGatewayId and required setting keys (requiredFields / fieldDetails) for each gateway type (e.g. Stripe, Braintree); then build setting with those keys as field names and your credential values.",
   inputSchema: {
     type: "object" as const,
     properties: {
-      gblGatewayId: { type: "number", description: "Global gateway ID (required)" },
+      gblGatewayId: {
+        type: "number",
+        description:
+          "Global gateway ID (required). Obtain from list_global_gateways; use the id as gblGatewayId.",
+      },
       displayName: { type: "string", description: "Display name for the gateway" },
       setting: {
         type: "object",
         description:
-          "Credentials object (required). Keys depend on gateway type, e.g. publicKey, privateKey, merchantId, transactionKey. Pass as key-value object.",
+          "Credentials object (required). Keys must match the gateway's requiredFields from list_global_gateways (e.g. publicKey, privateKey, merchantId, transactionKey). Use fieldDetails for human-readable labels.",
       },
       card: {
         type: "array",
