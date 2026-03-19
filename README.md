@@ -13,11 +13,11 @@ Model Context Protocol (MCP) server for the [Rebillia Public API](https://apigui
   - **Invoices** (8 tools) – List, get, create, update, delete; charge (card/online with paymentType), charge_external (offline), void
   - **Transactions** (4 tools) – List, get, refund (amount in **cents**), void (before settlement only)
   - **Bill runs** (4 tools) – List (filter by completed/pending/error), get, update (newDateTime, ISO 8601), get bill run invoices
-- **Gateways** (7 tools) – List, get, create, update, delete, test gateway, get client token
+- **Gateways** (8 tools) – List, get, create, update, delete, test gateway, get client token, create setup intent
 - **Currencies** (7 tools) – List, get, create, update, delete, get/set default currency
 - **Integrations** (8 tools) – List, get config, get/list by key; external invoices, products, order statuses
 - **Shipping** (2 tools) – List shipping services, calculate shipping
-- **Filters** (3 tools) – List filters (section required), create filter, list filter fields
+- **Filters** (4 tools) – List filters (section required), create filter, list filter fields, remove filter
 - **Documentation** (1 tool) – `get_api_docs` returns overview or other API docs as markdown (no external fetch)
 - **Resources** – API docs via MCP resources (`rebillia://docs/*`): overview, models, subscription-statuses, charge-types. Country list at `rebillia://globals/countries` (id, code, name) for use with address tools. All docs are self-contained; use these or the tool instead of fetching external URLs.
 - **Types** – TypeScript types aligned with the Rebillia Public API response shapes
@@ -321,13 +321,14 @@ Responses are JSON from the Rebillia Public API (paginated for list endpoints, s
 | `list_shipping_services` | List shipping services. |
 | `calculate_shipping` | Calculate shipping (companyCurrencyId, fromZip, fromCountry, zip, country, weight, orderAmount, etc.). |
 
-#### Filters (3 tools)
+#### Filters (4 tools)
 
 | Tool | Description |
 |------|-------------|
 | `list_filters` | List company filters. Required: section (e.g. subscriptions, invoices, customers, products, orders, billRuns). |
 | `create_filter` | Create filter (section, displayName, rules). |
 | `list_filter_fields` | List filter fields for a section. |
+| `remove_filter` | Delete a company filter by ID (DELETE /companies/filters/{filterId}). |
 
 #### Documentation (1 tool)
 
@@ -379,11 +380,11 @@ mcp/
 │   │   ├── invoices/         # Invoice tools (8)
 │   │   ├── transactions/     # Transaction tools (4)
 │   │   ├── bill_runs/        # Bill run tools (4)
-│   │   ├── gateways/         # Gateway tools (7)
+│   │   ├── gateways/         # Gateway tools (8)
 │   │   ├── currencies/       # Currency tools (7)
 │   │   ├── integrations/     # Integration tools (8)
 │   │   ├── shipping/         # Shipping tools (2)
-│   │   ├── filters/          # Filter tools (3)
+│   │   ├── filters/          # Filter tools (4)
 │   │   └── docs/             # get_api_docs (1)
 │   ├── resources/
 │   │   ├── index.ts          # listResources(), readResource() (legacy apiResources)

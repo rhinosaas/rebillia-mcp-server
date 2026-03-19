@@ -53,3 +53,11 @@ export async function createFilter(
 ): Promise<unknown> {
   return client.post<unknown>("/companies/filters", body);
 }
+
+/** DELETE /companies/filters/{filterId} */
+export async function deleteFilter(
+  client: Client,
+  filterId: number
+): Promise<unknown> {
+  return client.delete<unknown>(`/companies/filters/${filterId}`);
+}
