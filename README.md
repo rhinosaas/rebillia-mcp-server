@@ -220,7 +220,7 @@ Responses are JSON from the Rebillia Public API (paginated for list endpoints, s
 | `update_product_rate_plan_charge` | Update product rate plan charge by ID. |
 | `delete_product_rate_plan_charge` | Delete product rate plan charge by ID. |
 
-#### Subscriptions (20 tools)
+#### Subscriptions (19 tools)
 
 | Tool | Description |
 |------|-------------|
@@ -230,7 +230,6 @@ Responses are JSON from the Rebillia Public API (paginated for list endpoints, s
 | `update_subscription` | Update subscription by ID. |
 | `delete_subscription` | Delete subscription by ID. |
 | `update_subscription_status` | Update status (e.g. archived). |
-| `get_subscription_next_bill` | Preview next bill. |
 | `get_subscription_upcoming_charges` | Upcoming charges. |
 | `get_subscription_invoices` | Invoices for subscription. |
 | `get_subscription_logs` | Logs for subscription. |

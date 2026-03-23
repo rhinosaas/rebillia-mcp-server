@@ -48,7 +48,6 @@ describe("MCP server integration", () => {
       expect(names).toContain("delete_customer");
       expect(names).toContain("create_subscription");
       expect(names).toContain("update_subscription_status");
-      expect(names).toContain("get_subscription_next_bill");
       expect(names).toContain("get_api_docs");
     });
   });

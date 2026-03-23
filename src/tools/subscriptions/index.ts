@@ -10,7 +10,6 @@ import { deleteSubscriptionTool } from "./deleteSubscription.js";
 import { getSubscriptionExternalInvoicesTool } from "./getSubscriptionExternalInvoices.js";
 import { getSubscriptionInvoicesTool } from "./getSubscriptionInvoices.js";
 import { getSubscriptionLogsTool } from "./getSubscriptionLogs.js";
-import { getSubscriptionNextBillTool } from "./getSubscriptionNextBill.js";
 import { getSubscriptionRatePlanChargeTool } from "./getSubscriptionRatePlanCharge.js";
 import { getSubscriptionRatePlanTool } from "./getSubscriptionRatePlan.js";
 import { getSubscriptionTool } from "./getSubscription.js";
@@ -24,7 +23,7 @@ import { updateSubscriptionRatePlanTool } from "./updateSubscriptionRatePlan.js"
 import { updateSubscriptionStatusTool } from "./updateSubscriptionStatus.js";
 import { updateSubscriptionTool } from "./updateSubscription.js";
 
-/** All 20 subscription tools. */
+/** All 19 subscription tools. */
 export function registerSubscriptionTools(): Tool[] {
   return [
     listSubscriptionsTool,
@@ -33,7 +32,6 @@ export function registerSubscriptionTools(): Tool[] {
     updateSubscriptionTool,
     deleteSubscriptionTool,
     updateSubscriptionStatusTool,
-    getSubscriptionNextBillTool,
     getSubscriptionUpcomingChargesTool,
     getSubscriptionInvoicesTool,
     getSubscriptionLogsTool,
@@ -56,7 +54,6 @@ export { createSubscriptionTool } from "./createSubscription.js";
 export { updateSubscriptionTool } from "./updateSubscription.js";
 export { deleteSubscriptionTool } from "./deleteSubscription.js";
 export { updateSubscriptionStatusTool } from "./updateSubscriptionStatus.js";
-export { getSubscriptionNextBillTool } from "./getSubscriptionNextBill.js";
 export { getSubscriptionUpcomingChargesTool } from "./getSubscriptionUpcomingCharges.js";
 export { getSubscriptionInvoicesTool } from "./getSubscriptionInvoices.js";
 export { getSubscriptionLogsTool } from "./getSubscriptionLogs.js";

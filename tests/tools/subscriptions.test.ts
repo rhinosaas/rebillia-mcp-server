@@ -1,6 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createSubscriptionTool } from "../../src/tools/subscriptions/createSubscription.js";
-import { getSubscriptionNextBillTool } from "../../src/tools/subscriptions/getSubscriptionNextBill.js";
 import { updateSubscriptionStatusTool } from "../../src/tools/subscriptions/updateSubscriptionStatus.js";
 
 describe("Subscription tools", () => {
@@ -135,36 +134,6 @@ describe("Subscription tools", () => {
           status,
         });
       }
-    });
-  });
-
-  describe("get_subscription_next_bill", () => {
-    it("calls GET /subscriptions/{subscriptionId}/nextBill", async () => {
-      const nextBill = { total: 2999, dateDue: "2025-02-15", charges: [] };
-      mockClient.get.mockResolvedValueOnce(nextBill);
-
-      const result = await getSubscriptionNextBillTool.handler(mockClient as never, {
-        subscriptionId: "sub-789",
-      });
-
-      expect(mockClient.get).toHaveBeenCalledTimes(1);
-      expect(mockClient.get).toHaveBeenCalledWith("/subscriptions/sub-789/nextBill");
-      expect(JSON.parse((result as { content: [{ text: string }] }).content[0].text)).toEqual(
-        nextBill
-      );
-    });
-
-    it("appends include query param when provided", async () => {
-      mockClient.get.mockResolvedValueOnce({});
-
-      await getSubscriptionNextBillTool.handler(mockClient as never, {
-        subscriptionId: "sub-999",
-        include: "rateplan,rateplanCharge",
-      });
-
-      expect(mockClient.get).toHaveBeenCalledWith(
-        "/subscriptions/sub-999/nextBill?include=rateplan%2CrateplanCharge"
-      );
     });
   });
 });
