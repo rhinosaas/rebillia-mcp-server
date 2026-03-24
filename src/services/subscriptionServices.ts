@@ -77,6 +77,19 @@ export interface CreateSubscriptionBody {
   [k: string]: unknown;
 }
 
+/**
+ * Create subscription "from product rate plan" (simplified API).
+ * POST /subscriptions/from-product-rateplan
+ */
+export interface CreateSubscriptionFromProductRatePlanBody {
+  productRatePlanId: number;
+  customerId: number;
+  customerPaymentMethodId: number;
+  billingAddressId: number;
+  effectiveStartDate: string;
+  [k: string]: unknown;
+}
+
 export interface UpdateSubscriptionBody {
   name?: string;
   companyCurrencyId?: number;
@@ -124,6 +137,14 @@ export async function createSubscription(
   body: CreateSubscriptionBody
 ): Promise<unknown> {
   return client.post<unknown>("/subscriptions", body);
+}
+
+/** Create subscription from single product rate plan (simplified API). */
+export async function createSubscriptionFromProductRatePlan(
+  client: Client,
+  body: CreateSubscriptionFromProductRatePlanBody
+): Promise<unknown> {
+  return client.post<unknown>("/subscriptions/from-product-rateplan", body);
 }
 
 export async function updateSubscription(

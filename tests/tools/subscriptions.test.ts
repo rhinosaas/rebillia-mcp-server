@@ -20,90 +20,28 @@ describe("Subscription tools", () => {
   });
 
   describe("create_subscription", () => {
-    it("sends POST /subscriptions with nested body structure (ratePlan, ratePlanCharge)", async () => {
-      const created = { id: "sub-1", name: "My Subscription", status: "active" };
+    it("sends POST /subscriptions/from-product-rateplan with simplified body", async () => {
+      const created = { id: "sub-1", status: "active" };
       mockClient.post.mockResolvedValueOnce(created);
 
       const result = await createSubscriptionTool.handler(mockClient as never, {
+        productRatePlanId: 10,
         customerId: 100,
-        name: "My Subscription",
-        companyCurrencyId: 1,
+        customerPaymentMethodId: 4,
+        billingAddressId: 5,
         effectiveStartDate: "2025-01-15",
-        ratePlan: [
-          {
-            productRatePlanId: 10,
-            name: "Pro Plan",
-            type: "ongoing",
-            ratePlanCharge: [
-              { quantity: 1, productRatePlanChargeId: 5 },
-              {
-                quantity: 2,
-                name: "Add-on",
-                chargeTier: [{ currency: "USD", price: 999 }],
-                billCycleType: "chargeTriggerDay",
-                endDateCondition: "subscriptionEnd",
-              },
-            ],
-          },
-        ],
       });
 
       expect(mockClient.post).toHaveBeenCalledTimes(1);
-      expect(mockClient.post).toHaveBeenCalledWith("/subscriptions", {
+      expect(mockClient.post).toHaveBeenCalledWith("/subscriptions/from-product-rateplan", {
+        productRatePlanId: 10,
         customerId: 100,
-        name: "My Subscription",
-        companyCurrencyId: 1,
+        customerPaymentMethodId: 4,
+        billingAddressId: 5,
         effectiveStartDate: "2025-01-15",
-        ratePlan: [
-          {
-            productRatePlanId: 10,
-            name: "Pro Plan",
-            type: "ongoing",
-            ratePlanCharge: [
-              { quantity: 1, productRatePlanChargeId: 5 },
-              {
-                quantity: 2,
-                name: "Add-on",
-                chargeTier: [{ currency: "USD", price: 999 }],
-                billCycleType: "chargeTriggerDay",
-                endDateCondition: "subscriptionEnd",
-              },
-            ],
-          },
-        ],
       });
       expect(result.content).toHaveLength(1);
-      expect(JSON.parse((result as { content: [{ text: string }] }).content[0].text)).toEqual(
-        created
-      );
-    });
-
-    it("sends optional top-level fields when provided", async () => {
-      mockClient.post.mockResolvedValueOnce({ id: "sub-2" });
-
-      await createSubscriptionTool.handler(mockClient as never, {
-        customerId: 200,
-        name: "Other Sub",
-        companyCurrencyId: 2,
-        effectiveStartDate: "2025-02-01",
-        ratePlan: [{ productRatePlanId: 20 }],
-        companyGatewayId: 3,
-        customerPaymentMethodId: 4,
-        billingAddressId: 5,
-        shippingAddressId: 6,
-      });
-
-      expect(mockClient.post).toHaveBeenCalledWith("/subscriptions", {
-        customerId: 200,
-        name: "Other Sub",
-        companyCurrencyId: 2,
-        effectiveStartDate: "2025-02-01",
-        ratePlan: [{ productRatePlanId: 20 }],
-        companyGatewayId: 3,
-        customerPaymentMethodId: 4,
-        billingAddressId: 5,
-        shippingAddressId: 6,
-      });
+      expect(JSON.parse(result.content[0].text)).toEqual(created);
     });
   });
 

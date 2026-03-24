@@ -226,7 +226,7 @@ Responses are JSON from the Rebillia Public API (paginated for list endpoints, s
 |------|-------------|
 | `list_subscriptions` | List subscriptions (include, status, query, orderBy, sortBy, itemPerPage, pageNo). |
 | `get_subscription` | Get subscription by ID. |
-| `create_subscription` | Create subscription (customerId, name, companyCurrencyId, effectiveStartDate, ratePlan array). |
+| `create_subscription` | Create subscription from product rate plan (productRatePlanId, customerId, customerPaymentMethodId, billingAddressId, effectiveStartDate). |
 | `update_subscription` | Update subscription by ID. |
 | `delete_subscription` | Delete subscription by ID. |
 | `update_subscription_status` | Update status (e.g. archived). |
