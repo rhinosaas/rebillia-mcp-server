@@ -120,6 +120,23 @@ describe("Customer tools", () => {
       });
     });
 
+    it("treats businessName as optional when null", async () => {
+      mockClient.post.mockResolvedValueOnce({ id: "cust-457" });
+
+      await createCustomerTool.handler(mockClient as never, {
+        firstName: "John",
+        lastName: "Smith",
+        email: "john@example.com",
+        businessName: null,
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith("/customers", {
+        firstName: "John",
+        lastName: "Smith",
+        email: "john@example.com",
+      });
+    });
+
     it("returns error when required fields missing", async () => {
       const result = await createCustomerTool.handler(mockClient as never, {
         firstName: "Jane",

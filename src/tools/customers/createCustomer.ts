@@ -8,7 +8,7 @@ const schema = z.object({
   firstName: z.string().min(1, "firstName is required"),
   lastName: z.string().min(1, "lastName is required"),
   email: z.string().email("Invalid email"),
-  businessName: z.string().optional(),
+  businessName: z.preprocess((value) => (value === null ? undefined : value), z.string().optional()),
   locale: z.string().optional(),
   phoneNum: z.string().optional(),
   phoneExt: z.string().optional(),

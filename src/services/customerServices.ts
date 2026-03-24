@@ -201,7 +201,10 @@ export async function getCustomer(
 }
 
 export async function createCustomer(client: Client, body: CreateCustomerBody): Promise<Customer> {
-  return client.post<Customer>("/customers", body);
+  const payload = Object.fromEntries(
+    Object.entries(body).filter(([, value]) => value !== undefined)
+  ) as CreateCustomerBody;
+  return client.post<Customer>("/customers", payload);
 }
 
 export async function updateCustomer(
