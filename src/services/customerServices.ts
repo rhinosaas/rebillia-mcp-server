@@ -226,7 +226,7 @@ export async function deleteCustomer(
   customerId: string
 ): Promise<Record<string, unknown>> {
   const result = await client.delete<Record<string, unknown>>(`/customers/${customerId}`);
-  return Object.keys(result ?? {}).length ? result : { success: true, message: "Customer deleted" };
+  return Object.keys(result ?? {}).length ? result : { success: true, message: "Customer disabled" };
 }
 
 export async function getCustomerInvoices(
