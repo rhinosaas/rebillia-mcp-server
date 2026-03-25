@@ -78,18 +78,18 @@ export interface CreateCustomerAddressBody {
 }
 
 export interface UpdateCustomerAddressBody {
-  name?: string;
-  contactName?: string;
-  street1?: string;
-  street2?: string;
-  city?: string;
-  state?: string;
-  zip?: string;
-  countryId?: number;
-  company?: string;
-  contactEmail?: string;
-  contactPhone?: string;
-  type?: AddressType;
+  name?: string | null;
+  contactName?: string | null;
+  street1?: string | null;
+  street2?: string | null;
+  city?: string | null;
+  state?: string | null;
+  zip?: string | null;
+  countryId?: number | null;
+  company?: string | null;
+  contactEmail?: string | null;
+  contactPhone?: string | null;
+  type?: AddressType | null;
 }
 
 /** Billing address for payment method (upstream API: countryId). */
