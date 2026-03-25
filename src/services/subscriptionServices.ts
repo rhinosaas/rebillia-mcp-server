@@ -284,6 +284,7 @@ export async function getSubscriptionExternalInvoices(
 // ============================================================================
 
 export interface ListSubscriptionRatePlansParams {
+  include?: string;
   pageNo?: number;
   itemPerPage?: number;
   orderBy?: string;
@@ -297,6 +298,7 @@ export async function listSubscriptionRatePlans(
   params?: ListSubscriptionRatePlansParams
 ): Promise<PaginatedResponse<unknown>> {
   const search = new URLSearchParams();
+  if (params?.include) search.append("include", params.include);
   if (params?.pageNo != null) search.append("pageNo", String(params.pageNo));
   if (params?.itemPerPage != null) search.append("itemPerPage", String(params.itemPerPage));
   if (params?.orderBy) search.append("orderBy", params.orderBy ?? "");
