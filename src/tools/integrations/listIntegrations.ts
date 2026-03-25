@@ -7,15 +7,12 @@ import * as integrationService from "../../services/integrationServices.js";
 
 const schema = z.object({
   type: z.enum(INTEGRATION_TYPES).optional(),
-  include: z.string().optional(),
-  itemPerPage: z.number().int().min(1).optional(),
-  pageNo: z.number().int().min(1).optional(),
 });
 
 const definition = {
   name: "list_integrations",
   description:
-    "List company integrations. GET /integrations. Optional: type (ecommerce, email, marketing, tax, shipping, accounting, chat), include, itemPerPage, pageNo.",
+    "List company integrations. GET /integrations. Optional: type (ecommerce, email, marketing, tax, shipping, accounting, chat).",
   inputSchema: {
     type: "object" as const,
     properties: {
@@ -24,9 +21,6 @@ const definition = {
         description:
           "Filter by integration type: ecommerce, email, marketing, tax, shipping, accounting, chat",
       },
-      include: { type: "string", description: "Comma-separated attributes to include" },
-      itemPerPage: { type: "number", description: "Items per page" },
-      pageNo: { type: "number", description: "Page number" },
     },
     required: [],
   },
