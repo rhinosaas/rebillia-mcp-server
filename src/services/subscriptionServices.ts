@@ -284,7 +284,6 @@ export async function getSubscriptionExternalInvoices(
 // ============================================================================
 
 export interface ListSubscriptionRatePlansParams {
-  include?: string;
   pageNo?: number;
   itemPerPage?: number;
   orderBy?: string;
@@ -298,7 +297,6 @@ export async function listSubscriptionRatePlans(
   params?: ListSubscriptionRatePlansParams
 ): Promise<PaginatedResponse<unknown>> {
   const search = new URLSearchParams();
-  if (params?.include) search.append("include", params.include);
   if (params?.pageNo != null) search.append("pageNo", String(params.pageNo));
   if (params?.itemPerPage != null) search.append("itemPerPage", String(params.itemPerPage));
   if (params?.orderBy) search.append("orderBy", params.orderBy ?? "");
@@ -313,14 +311,10 @@ export async function listSubscriptionRatePlans(
 export async function getSubscriptionRatePlan(
   client: Client,
   subscriptionId: string,
-  ratePlanId: string,
-  params?: { include?: string }
+  ratePlanId: string
 ): Promise<unknown> {
-  const search = new URLSearchParams();
-  if (params?.include) search.append("include", params.include);
-  const q = search.toString();
   return client.get<unknown>(
-    `/subscriptions/${subscriptionId}/rateplans/${ratePlanId}${q ? `?${q}` : ""}`
+    `/subscriptions/${subscriptionId}/rateplans/${ratePlanId}`
   );
 }
 
@@ -389,14 +383,10 @@ export async function removeSubscriptionRatePlan(
 export async function getSubscriptionRatePlanCharge(
   client: Client,
   subscriptionId: string,
-  chargeId: string,
-  params?: { include?: string }
+  chargeId: string
 ): Promise<unknown> {
-  const search = new URLSearchParams();
-  if (params?.include) search.append("include", params.include);
-  const q = search.toString();
   return client.get<unknown>(
-    `/subscriptions/${subscriptionId}/rateplan-charges/${chargeId}${q ? `?${q}` : ""}`
+    `/subscriptions/${subscriptionId}/rateplan-charges/${chargeId}`
   );
 }
 
