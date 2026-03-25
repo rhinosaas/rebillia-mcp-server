@@ -6,6 +6,7 @@ import * as subscriptionService from "../../services/subscriptionServices.js";
 
 const chargeTypeEnum = ["oneTime", "recurring", "usage"] as const;
 const chargeModelEnum = ["flatFeePricing", "perUnitPricing", "tieredPricing", "volumePricing"] as const;
+const billingPeriodAlignmentEnum = ["alignToCharge", "alignToSubscriptionStart", "alignToTermStart"] as const;
 const billCycleTypeEnum = [
   "chargeTriggerDay",
   "defaultFromCustomer",
@@ -59,21 +60,28 @@ const schema = z
     productRatePlanChargeId: z.number().int().optional(),
     billingPeriod: z.string().optional(),
     billingTiming: z.string().optional(),
-    billingPeriodAlignment: z.string().optional(),
+    billingPeriodAlignment: z.enum(billingPeriodAlignmentEnum, {
+      errorMap: () => ({
+        message:
+          "billingPeriodAlignment must be one of: alignToCharge, alignToSubscriptionStart, alignToTermStart",
+      }),
+    }).optional(),
     specificBillingPeriod: z.number().int().optional(),
   })
   .refine(
-    (data) => data.chargeType !== "recurring" || data.billingPeriodAlignment != null,
+    (data) =>
+      data.chargeType !== "recurring" ||
+      (data.billingPeriodAlignment != null && data.specificBillingPeriod != null),
     {
       message:
-        "When chargeType is 'recurring', billingPeriodAlignment is required (e.g. alignToCharge, alignToSubscriptionStart, alignToTermStart).",
+        "When chargeType is 'recurring', billingPeriodAlignment and specificBillingPeriod are required.",
     }
   );
 
 const definition = {
   name: "add_subscription_rate_plan_charge",
   description:
-    "Add a rate plan charge to a subscription rate plan. POST .../rateplan-charges. Required: subscriptionId, ratePlanId, quantity, name, category (physical|digital), chargeModel (flatFeePricing|perUnitPricing|tieredPricing|volumePricing), billCycleType (chargeTriggerDay|defaultFromCustomer|specificDayOfMonth|specificDayOfWeek|specificMonthOfYear|subscriptionStartDay|subscriptionFreeTrial), chargeTier array (each: currency, price required; optional startingUnit, endingUnit, priceFormat, tier), chargeType (oneTime|recurring|usage), endDateCondition (subscriptionEnd|fixedPeriod), taxable (boolean), weight. When chargeType is recurring, billingPeriodAlignment is also required. Optional: productRatePlanChargeId, billingPeriod, billingTiming, specificBillingPeriod.",
+    "Add a rate plan charge to a subscription rate plan. POST .../rateplan-charges. Required: subscriptionId, ratePlanId, quantity, name, category (physical|digital), chargeModel (flatFeePricing|perUnitPricing|tieredPricing|volumePricing), billCycleType (chargeTriggerDay|defaultFromCustomer|specificDayOfMonth|specificDayOfWeek|specificMonthOfYear|subscriptionStartDay|subscriptionFreeTrial), chargeTier array (each: currency, price required; optional startingUnit, endingUnit, priceFormat, tier), chargeType (oneTime|recurring|usage), endDateCondition (subscriptionEnd|fixedPeriod), taxable (boolean), weight. When chargeType is recurring, billingPeriodAlignment and specificBillingPeriod are also required. Optional: productRatePlanChargeId, billingPeriod, billingTiming.",
   inputSchema: {
     type: "object" as const,
     properties: {
@@ -139,9 +147,11 @@ const definition = {
       billingTiming: { type: "string", description: "inAdvance, inArrears" },
       billingPeriodAlignment: {
         type: "string",
-        description: "Required when chargeType is recurring. alignToCharge, alignToSubscriptionStart, alignToTermStart",
+        description:
+          "Required when chargeType is recurring. Valid values: alignToCharge, alignToSubscriptionStart, alignToTermStart",
+        enum: ["alignToCharge", "alignToSubscriptionStart", "alignToTermStart"],
       },
-      specificBillingPeriod: { type: "number", description: "Specific billing period" },
+      specificBillingPeriod: { type: "number", description: "Required when chargeType is recurring" },
     },
     required: [
       "subscriptionId",
