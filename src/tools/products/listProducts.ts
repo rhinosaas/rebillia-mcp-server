@@ -15,11 +15,14 @@ const schema = z.object({
 const definition = {
   name: "list_products",
   description:
-    "List products. GET /products. Optional: include, orderBy, sortBy (ASC/DESC), itemPerPage, pageNo.",
+    "List products. GET /products. Optional: include (productRateplan, productRateplanCharge, chargeTier), orderBy, sortBy (ASC/DESC), itemPerPage, pageNo.",
   inputSchema: {
     type: "object" as const,
     properties: {
-      include: { type: "string", description: "Comma-separated attributes to include" },
+      include: {
+        type: "string",
+        description: "Comma-separated includes: productRateplan, productRateplanCharge, chargeTier",
+      },
       orderBy: { type: "string", description: "Sort column" },
       sortBy: { type: "string", description: "ASC or DESC" },
       itemPerPage: { type: "number", description: "Items per page" },

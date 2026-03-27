@@ -189,7 +189,7 @@ Responses are JSON from the Rebillia Public API (paginated for list endpoints, s
 
 | Tool | Description |
 |------|-------------|
-| `list_products` | List products (include, orderBy, sortBy, itemPerPage, pageNo). |
+| `list_products` | List products (include: productRateplan, productRateplanCharge, chargeTier; orderBy, sortBy, itemPerPage, pageNo). |
 | `get_product` | Get product by ID. |
 | `create_product` | Create product (name, category, optional description, sku). |
 | `update_product` | Update product by ID. |
