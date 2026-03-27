@@ -403,7 +403,7 @@ export interface AddSubscriptionRatePlanChargeBody {
   category?: "physical" | "digital";
   chargeTier?: SubscriptionChargeTierItem[];
   taxable?: boolean;
-  weight?: number;
+  weight?: number | null;
   endDateCondition?: string;
   billingPeriod?: string;
   billingTiming?: string;

@@ -28,6 +28,22 @@ const chargeTierItemSchema = z.object({
 
 const endDateConditionEnum = ["subscriptionEnd", "fixedPeriod"] as const;
 
+const weightSchema = z
+  .union([z.coerce.number(), z.null()])
+  .transform((value, ctx) => {
+    if (value === null) return null;
+    if (!Number.isFinite(value)) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "weight must be a finite number or null" });
+      return z.NEVER;
+    }
+    const normalizedWeight = Math.round(value * 100);
+    if (normalizedWeight < 0) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "weight must be >= 0 or null" });
+      return z.NEVER;
+    }
+    return normalizedWeight;
+  });
+
 const schema = z
   .object({
     subscriptionId: z.string().min(1, "subscriptionId is required"),
@@ -56,7 +72,7 @@ const schema = z
       errorMap: () => ({ message: "endDateCondition is required: subscriptionEnd|fixedPeriod" }),
     }),
     taxable: z.boolean({ required_error: "taxable (boolean) is required" }),
-    weight: z.coerce.number().int().min(0, "weight is required"),
+    weight: weightSchema,
     productRatePlanChargeId: z.number().int().optional(),
     billingPeriod: z.string().optional(),
     billingTiming: z.string().optional(),
@@ -141,7 +157,11 @@ const definition = {
         enum: ["subscriptionEnd", "fixedPeriod"],
       },
       taxable: { type: "boolean", description: "Required. Whether the charge is taxable" },
-      weight: { type: "number", description: "Required. Weight (integer)" },
+      weight: {
+        type: "number",
+        description:
+          "Required. Weight or null. Numeric values are converted to integer by multiplying by 100 (e.g. 32.75 -> 3275).",
+      },
       productRatePlanChargeId: { type: "number", description: "Product rate plan charge ID to reference" },
       billingPeriod: { type: "string", description: "day, week, month, year" },
       billingTiming: { type: "string", description: "inAdvance, inArrears" },
