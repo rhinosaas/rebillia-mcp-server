@@ -273,7 +273,7 @@ Responses are JSON from the Rebillia Public API (paginated for list endpoints, s
 | `list_bill_runs` | List bill runs. Optional: include (e.g. invoice), query (completed/pending/error), orderBy, sortBy, itemPerPage, pageNo. |
 | `get_bill_run` | Get bill run by ID. |
 | `update_bill_run` | Update bill run schedule. Required: billRunId, newDateTime (ISO 8601, e.g. 2026-02-26T20:05:00Z). Note: this tool only works on bill runs with status pending. Calls against completed or error runs will fail. |
-| `get_bill_run_invoices` | Get invoices for a bill run. |
+| `get_bill_run_invoices` | Get invoices for a bill run. Optional: pageNo, itemPerPage. |
 
 #### Gateways (9 tools)
 

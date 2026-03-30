@@ -20,6 +20,11 @@ export interface UpdateBillRunBody {
   newDateTime: string;
 }
 
+export interface BillRunInvoicesParams {
+  pageNo?: number;
+  itemPerPage?: number;
+}
+
 /** GET /bill-run */
 export async function listBillRuns(
   client: Client,
@@ -74,7 +79,12 @@ export async function updateBillRun(
 /** GET /bill-run/{billRunId}/invoices */
 export async function getBillRunInvoices(
   client: Client,
-  billRunId: string
+  billRunId: string,
+  params?: BillRunInvoicesParams
 ): Promise<unknown> {
-  return client.get<unknown>(`/bill-run/${billRunId}/invoices`);
+  const search = new URLSearchParams();
+  if (params?.pageNo != null) search.append("pageNo", String(params.pageNo));
+  if (params?.itemPerPage != null) search.append("itemPerPage", String(params.itemPerPage));
+  const q = search.toString();
+  return client.get<unknown>(`/bill-run/${billRunId}/invoices${q ? `?${q}` : ""}`);
 }
