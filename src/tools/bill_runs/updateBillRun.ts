@@ -12,7 +12,7 @@ const schema = z.object({
 const definition = {
   name: "update_bill_run",
   description:
-    "Update a bill run. PUT /bill-run/{billRunId}. Required: billRunId, newDateTime. Use ISO 8601: YYYY-MM-DDTHH:MM:SS or with timezone (e.g. 2026-02-26T20:05:00Z). If no timezone, Z (UTC) is appended.",
+    "Update a bill run. PUT /bill-run/{billRunId}. Required: billRunId, newDateTime. Use ISO 8601: YYYY-MM-DDTHH:MM:SS or with timezone (e.g. 2026-02-26T20:05:00Z). If no timezone, Z (UTC) is appended. Note: this tool only works on bill runs with status pending. Calls against completed or error runs will fail.",
   inputSchema: {
     type: "object" as const,
     properties: {

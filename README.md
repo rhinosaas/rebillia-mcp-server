@@ -12,7 +12,7 @@ Model Context Protocol (MCP) server for the [Rebillia Public API](https://apigui
   - **Subscriptions** (20 tools) – List, get, create, update, delete; status; next bill, upcoming charges, invoices, logs, external invoices; subscription rate plans and rate plan charges (add/update/remove)
   - **Invoices** (8 tools) – List, get, create, update, delete; charge (card/online with paymentType), charge_external (offline), void
   - **Transactions** (4 tools) – List, get, refund (amount in **cents**), void (before settlement only)
-  - **Bill runs** (4 tools) – List (filter by completed/pending/error), get, update (newDateTime, ISO 8601), get bill run invoices
+  - **Bill runs** (4 tools) – List (filter by completed/pending/error), get, update (newDateTime, ISO 8601; pending only), get bill run invoices
 - **Gateways** (9 tools) – List global gateways (discover gblGatewayId and required setting keys), list company gateways, get, create, update, delete, test gateway, get client token, create setup intent
 - **Currencies** (7 tools) – List, get, create, update, delete, get/set default currency
 - **Integrations** (8 tools) – List, get config, get/list by key; external invoices, products, order statuses
@@ -272,7 +272,7 @@ Responses are JSON from the Rebillia Public API (paginated for list endpoints, s
 |------|-------------|
 | `list_bill_runs` | List bill runs. Optional: include (e.g. invoice), query (completed/pending/error), orderBy, sortBy, itemPerPage, pageNo. |
 | `get_bill_run` | Get bill run by ID. |
-| `update_bill_run` | Update bill run schedule. Required: billRunId, newDateTime (ISO 8601, e.g. 2026-02-26T20:05:00Z). |
+| `update_bill_run` | Update bill run schedule. Required: billRunId, newDateTime (ISO 8601, e.g. 2026-02-26T20:05:00Z). Note: this tool only works on bill runs with status pending. Calls against completed or error runs will fail. |
 | `get_bill_run_invoices` | Get invoices for a bill run. |
 
 #### Gateways (9 tools)
