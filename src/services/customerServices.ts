@@ -272,10 +272,15 @@ export async function getCustomerLogs(
 
 export async function listCustomerAddresses(
   client: Client,
-  customerId: string
+  customerId: string,
+  params?: Pick<PaginationIncludeParams, "pageNo" | "itemPerPage">
 ): Promise<CustomerAddressBook[] | PaginatedResponse<CustomerAddressBook>> {
+  const search = new URLSearchParams();
+  if (params?.pageNo != null) search.append("pageNo", String(params.pageNo));
+  if (params?.itemPerPage != null) search.append("itemPerPage", String(params.itemPerPage));
+  const q = search.toString();
   return client.get<CustomerAddressBook[] | PaginatedResponse<CustomerAddressBook>>(
-    `/customers/${customerId}/addressbooks`
+    `/customers/${customerId}/addressbooks${q ? `?${q}` : ""}`
   );
 }
 
@@ -332,10 +337,15 @@ export async function deleteCustomerAddress(
 
 export async function listCustomerPaymentMethods(
   client: Client,
-  customerId: string
+  customerId: string,
+  params?: Pick<PaginationIncludeParams, "pageNo" | "itemPerPage">
 ): Promise<CustomerPaymentMethod[] | PaginatedResponse<CustomerPaymentMethod>> {
+  const search = new URLSearchParams();
+  if (params?.pageNo != null) search.append("pageNo", String(params.pageNo));
+  if (params?.itemPerPage != null) search.append("itemPerPage", String(params.itemPerPage));
+  const q = search.toString();
   return client.get<CustomerPaymentMethod[] | PaginatedResponse<CustomerPaymentMethod>>(
-    `/customers/${customerId}/paymentmethods`
+    `/customers/${customerId}/paymentmethods${q ? `?${q}` : ""}`
   );
 }
 

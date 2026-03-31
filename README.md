@@ -171,12 +171,12 @@ Responses are JSON from the Rebillia Public API (paginated for list endpoints, s
 | `get_customer_invoices` | Get invoices for a customer. |
 | `get_customer_subscriptions` | Get subscriptions for a customer. |
 | `get_customer_logs` | Get logs for a customer. |
-| `list_customer_addresses` | List address book entries for a customer. |
+| `list_customer_addresses` | List address book entries for a customer (pageNo, itemPerPage). |
 | `get_customer_address` | Get address by ID. |
 | `create_customer_address` | Create address (name, contactName, street1, city, state, zip, countryCode (ISO 3166-1 alpha-2), type, …). |
 | `update_customer_address` | Update address by ID (partial update). Required: customerId, addressId. Optional: any address field (e.g. street1, city, state, zip, countryCode, name, contactName, street2, company, contactEmail, contactPhone, type (residential|commercial)). |
 | `delete_customer_address` | Delete address by ID. |
-| `list_customer_payment_methods` | List payment methods for a customer. |
+| `list_customer_payment_methods` | List payment methods for a customer (pageNo, itemPerPage). |
 | `get_customer_payment_method` | Get payment method by ID. |
 | `create_customer_payment_method` | Create payment method (gateway-agnostic). Required: companyGatewayId, type, **paymentMethodNonce**, billingAddress (countryCode, …). Get client credential via get_client_token; use your payment UI to produce paymentMethodNonce. No raw card data or gateway-specific fields. |
 | `update_customer_payment_method` | Update payment method billing address (gateway-agnostic). Required: customerId, paymentMethodId, billingAddress (countryCode, …). No payment or gateway-specific fields. |
