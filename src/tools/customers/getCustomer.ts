@@ -6,20 +6,22 @@ import * as customerService from "../../services/customerServices.js";
 
 const schema = z.object({
   id: z.string().min(1, "id is required"),
-  includeAddresses: z.boolean().optional(),
-  includePaymentMethods: z.boolean().optional(),
+  include: z.string().optional(),
 });
 
 const definition = {
   name: "get_customer",
   description:
-    "Get a specific customer by ID. GET /customers/{customerId}. Optional includes: addressbook, paymentmethod.",
+    "Get a specific customer by ID. GET /customers/{customerId}. Optional include supports: addressbook, paymentmethod, lastInvoice, subscriptions, unpaidInvoices, externalCustomers.",
   inputSchema: {
     type: "object" as const,
     properties: {
       id: { type: "string", description: "Customer ID" },
-      includeAddresses: { type: "boolean", description: "Include customer addresses (addressbook)" },
-      includePaymentMethods: { type: "boolean", description: "Include payment methods (paymentmethod)" },
+      include: {
+        type: "string",
+        description:
+          "Comma-separated includes: addressbook, paymentmethod, lastInvoice, subscriptions, unpaidInvoices, externalCustomers",
+      },
     },
     required: ["id"],
   },
@@ -30,10 +32,8 @@ async function handler(client: Client, args: Record<string, unknown> | undefined
   if (!parsed.success) {
     return errorResult(parsed.error.errors.map((e) => e.message).join("; "));
   }
-  const { id, includeAddresses, includePaymentMethods } = parsed.data;
-  return handleToolCall(() =>
-    customerService.getCustomer(client, id, { includeAddresses, includePaymentMethods })
-  );
+  const { id, include } = parsed.data;
+  return handleToolCall(() => customerService.getCustomer(client, id, { include }));
 }
 
 export const getCustomerTool: Tool = {

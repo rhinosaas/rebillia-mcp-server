@@ -190,13 +190,10 @@ export async function listCustomers(
 export async function getCustomer(
   client: Client,
   id: string,
-  options?: { includeAddresses?: boolean; includePaymentMethods?: boolean }
+  options?: { include?: string }
 ): Promise<Customer> {
   const search = new URLSearchParams();
-  const includes: string[] = [];
-  if (options?.includeAddresses) includes.push("addressbook");
-  if (options?.includePaymentMethods) includes.push("paymentmethod");
-  if (includes.length > 0) search.append("include", includes.join(","));
+  if (options?.include) search.append("include", options.include);
   return client.get<Customer>(`/customers/${id}${queryString(search)}`);
 }
 
