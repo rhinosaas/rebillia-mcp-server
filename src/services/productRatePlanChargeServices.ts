@@ -1,0 +1,233 @@
+/**
+ * Rate plan charge API service – ProductRatePlanChargeController endpoints.
+ */
+
+import type { PaginatedResponse } from "../types.js";
+
+export type Client = InstanceType<typeof import("../client.js").default>;
+
+/** Charge type: oneTime, recurring, usage (ProductRateplanChargeValidator) */
+export type ChargeType = "oneTime" | "recurring" | "usage";
+
+/** Charge model: flatFeePricing, perUnitPricing, tieredPricing, volumePricing */
+export type ChargeModel = "flatFeePricing" | "perUnitPricing" | "tieredPricing" | "volumePricing";
+
+/** Billing period: day, week, month, year */
+export type BillingPeriod = "day" | "week" | "month" | "year";
+
+/** Billing timing: inAdvance, inArrears */
+export type BillingTiming = "inAdvance" | "inArrears";
+
+export interface ChargeTierItem {
+  currency: string;
+  startingUnit?: string;
+  endingUnit?: string;
+  price: number;
+  priceFormat?: string;
+  tier?: number;
+}
+
+/** Ensure each charge tier has priceFormat (API requires it). Default to "" when missing. */
+function normalizeChargeTier(chargeTier: ChargeTierItem[]): ChargeTierItem[] {
+  return chargeTier.map((tier) => ({
+    ...tier,
+    priceFormat: tier.priceFormat ?? "",
+  }));
+}
+
+export interface ListRatePlanChargesParams {
+  include?: string;
+  orderBy?: string;
+  sortBy?: string;
+  pageNo?: number;
+  itemPerPage?: number;
+}
+
+/** Create body: productRateplan reference (ratePlanId), name, chargeType, chargeModel, billCycleType, category, chargeTier, taxable, weight, etc. */
+export interface CreateRatePlanChargeBody {
+  /** Rate plan reference (ID). URI: /product-rateplans/{ratePlanId} */
+  ratePlanId: number;
+  name: string;
+  chargeType: ChargeType;
+  chargeModel: ChargeModel;
+  billCycleType: string;
+  category: "physical" | "digital";
+  chargeTier: ChargeTierItem[];
+  taxable: boolean;
+  weight: number;
+  description?: string;
+  endDateCondition: "subscriptionEnd" | "fixedPeriod";
+  billingPeriod?: BillingPeriod;
+  billingTiming?: BillingTiming;
+  billingPeriodAlignment?: string;
+  specificBillingPeriod?: number;
+  allowChangeQuantity?: boolean;
+  billCycleDay?: number;
+  weeklyBillCycleDay?: string;
+  monthlyBillCycleYear?: number;
+  cutOffType?: string;
+  cutOffValue?: string;
+  delay?: number;
+  delayType?: string;
+  isFreeShipping?: boolean;
+  maxQuantity?: number;
+  minQuantity?: number;
+  quantity?: number;
+  listPriceBase?: string;
+  [k: string]: unknown;
+}
+
+export interface UpdateRatePlanChargeBody {
+  name?: string;
+  chargeType?: ChargeType;
+  chargeModel?: ChargeModel;
+  billCycleType?: string;
+  category?: "physical" | "digital";
+  chargeTier?: ChargeTierItem[];
+  taxable?: boolean;
+  weight?: number;
+  description?: string;
+  endDateCondition?: "subscriptionEnd" | "fixedPeriod";
+  billingPeriod?: BillingPeriod;
+  billingTiming?: BillingTiming;
+  billingPeriodAlignment?: string;
+  specificBillingPeriod?: number;
+  billCycleDay?: number;
+  weeklyBillCycleDay?: string;
+  monthlyBillCycleYear?: number;
+  [k: string]: unknown;
+}
+
+/** Keys that the backend requires for PUT (Backend Collection). Used to build merge body from GET response. */
+const PUT_BODY_KEYS = [
+  "name",
+  "chargeType",
+  "chargeModel",
+  "billCycleType",
+  "category",
+  "chargeTier",
+  "taxable",
+  "weight",
+  "description",
+  "endDateCondition",
+  "billingPeriod",
+  "billingTiming",
+  "billingPeriodAlignment",
+  "specificBillingPeriod",
+  "billCycleDay",
+  "weeklyBillCycleDay",
+  "monthlyBillCycleYear",
+] as const;
+
+const SNAKE_TO_CAMEL: Record<string, (typeof PUT_BODY_KEYS)[number]> = {
+  bill_cycle_type: "billCycleType",
+  bill_cycle_day: "billCycleDay",
+  weekly_bill_cycle_day: "weeklyBillCycleDay",
+  monthly_bill_cycle_year: "monthlyBillCycleYear",
+  charge_type: "chargeType",
+  charge_model: "chargeModel",
+  charge_tier: "chargeTier",
+  end_date_condition: "endDateCondition",
+  billing_period: "billingPeriod",
+  billing_timing: "billingTiming",
+  billing_period_alignment: "billingPeriodAlignment",
+  specific_billing_period: "specificBillingPeriod",
+};
+
+/**
+ * Normalize GET /product-rateplan-charges/{id} response into a partial UpdateRatePlanChargeBody
+ * so it can be merged with user payload. Handles camelCase or snake_case; extracts chargeTier and ensures priceFormat.
+ */
+export function existingChargeToUpdateBody(existing: unknown): Partial<UpdateRatePlanChargeBody> {
+  if (!existing || typeof existing !== "object") return {};
+  const o = existing as Record<string, unknown>;
+  const out: Record<string, unknown> = {};
+  const allKeys = [...PUT_BODY_KEYS];
+  for (const camel of allKeys) {
+    let v = o[camel];
+    if (v === undefined) {
+      const snake = Object.entries(SNAKE_TO_CAMEL).find(([, c]) => c === camel)?.[0];
+      if (snake) v = o[snake];
+    }
+    if (v === undefined) continue;
+    if (camel === "chargeTier" && Array.isArray(v)) {
+      out[camel] = (v as Record<string, unknown>[]).map((t) => ({
+        currency: t.currency ?? t.iso3 ?? "",
+        startingUnit: t.startingUnit ?? t.starting_unit,
+        endingUnit: t.endingUnit ?? t.ending_unit,
+        price: typeof t.price === "number" ? t.price : 0,
+        priceFormat: typeof (t.priceFormat ?? t.price_format) === "string" ? (t.priceFormat ?? t.price_format) : "",
+        tier: typeof t.tier === "number" ? t.tier : undefined,
+      }));
+    } else if (camel === "weight" && (typeof v === "number" || typeof v === "string")) {
+      out[camel] = Number(v);
+    } else {
+      out[camel] = v;
+    }
+  }
+  return out as Partial<UpdateRatePlanChargeBody>;
+}
+
+export async function listRatePlanCharges(
+  client: Client,
+  ratePlanId: string,
+  params?: ListRatePlanChargesParams
+): Promise<PaginatedResponse<unknown>> {
+  const search = new URLSearchParams();
+  if (params?.include) search.append("include", params.include);
+  if (params?.orderBy) search.append("orderBy", params.orderBy ?? "");
+  if (params?.sortBy) search.append("sortBy", params.sortBy ?? "");
+  if (params?.pageNo != null) search.append("pageNo", String(params.pageNo));
+  if (params?.itemPerPage != null) search.append("itemPerPage", String(params.itemPerPage));
+  const q = search.toString();
+  return client.get<PaginatedResponse<unknown>>(
+    `/product-rateplans/${ratePlanId}/product-rateplan-charges${q ? `?${q}` : ""}`
+  );
+}
+
+export async function getRatePlanCharge(
+  client: Client,
+  chargeId: string,
+  params?: { include?: string }
+): Promise<unknown> {
+  const search = new URLSearchParams();
+  if (params?.include) search.append("include", params.include);
+  const q = search.toString();
+  return client.get<unknown>(`/product-rateplan-charges/${chargeId}${q ? `?${q}` : ""}`);
+}
+
+export async function createRatePlanCharge(
+  client: Client,
+  body: CreateRatePlanChargeBody
+): Promise<unknown> {
+  const payload = { ...body };
+  if (payload.weight != null) payload.weight = Number(payload.weight);
+  if (payload.chargeTier?.length) payload.chargeTier = normalizeChargeTier(payload.chargeTier);
+  return client.post<unknown>("/product-rateplan-charges", payload);
+}
+
+export async function updateRatePlanCharge(
+  client: Client,
+  chargeId: string,
+  body: UpdateRatePlanChargeBody
+): Promise<unknown> {
+  const payload = Object.fromEntries(
+    Object.entries(body).filter(([, v]) => v !== undefined)
+  ) as UpdateRatePlanChargeBody;
+  if (payload.weight != null) payload.weight = Number(payload.weight);
+  if (payload.chargeTier?.length) payload.chargeTier = normalizeChargeTier(payload.chargeTier);
+  return client.put<unknown>(
+    `/product-rateplan-charges/${chargeId}`,
+    Object.keys(payload).length ? payload : undefined
+  );
+}
+
+export async function deleteRatePlanCharge(
+  client: Client,
+  chargeId: string
+): Promise<Record<string, unknown>> {
+  const result = await client.delete<Record<string, unknown>>(
+    `/product-rateplan-charges/${chargeId}`
+  );
+  return Object.keys(result ?? {}).length ? result : { success: true, message: "Rate plan charge deleted" };
+}

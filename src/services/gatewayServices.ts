@@ -1,0 +1,120 @@
+/**
+ * Gateway (Company Gateway) API service – PublicAPI CompanyGatewayController endpoints.
+ * Routes: /v1/gateways (base URL from client includes /v1).
+ */
+
+export type Client = InstanceType<typeof import("../client.js").default>;
+
+export interface ListGatewaysParams {
+  /** Filter by status (e.g. active, disabled, error, archive) */
+  status?: string;
+  companyCurrencyId?: string;
+  include?: string;
+}
+
+/** Create body: aligned with CompanyGatewayType. setting = credentials key-value object; card = array of card type IDs. */
+export interface CreateGatewayBody {
+  /** Global gateway ID (required). */
+  gblGatewayId: number;
+  displayName?: string;
+  /** Credentials key-value object (required). Keys depend on gateway type. */
+  setting: Record<string, string | number | boolean>;
+  /** Card type IDs (optional). */
+  card?: number[];
+  /** Payment method (required by form). */
+  paymentMethod?: string;
+}
+
+/** Update body: displayName and/or setting (credentials). */
+export interface UpdateGatewayBody {
+  displayName?: string;
+  setting?: Record<string, string | number | boolean>;
+}
+
+/** GET /gateways */
+export async function listGateways(
+  client: Client,
+  params?: ListGatewaysParams
+): Promise<unknown> {
+  const searchParams: string[] = [];
+  if (params?.status) searchParams.push(`status=${encodeURIComponent(params.status)}`);
+  if (params?.companyCurrencyId) {
+    searchParams.push(`companyCurrencyId=${encodeURIComponent(params.companyCurrencyId)}`);
+  }
+  if (params?.include) searchParams.push(`include=${encodeURIComponent(params.include)}`);
+  const q = searchParams.join("&");
+  return client.get<unknown>(`/gateways${q ? `?${q}` : ""}`);
+}
+
+/** GET /gateways/{gatewayId} */
+export async function getGateway(
+  client: Client,
+  gatewayId: string
+): Promise<unknown> {
+  return client.get<unknown>(`/gateways/${gatewayId}`);
+}
+
+/** POST /gateways */
+export async function createGateway(
+  client: Client,
+  body: CreateGatewayBody
+): Promise<unknown> {
+  return client.post<unknown>("/gateways", body);
+}
+
+/** PUT /gateways/{gatewayId} */
+export async function updateGateway(
+  client: Client,
+  gatewayId: string,
+  body: UpdateGatewayBody
+): Promise<unknown> {
+  const payload = Object.fromEntries(
+    Object.entries(body).filter(([, v]) => v !== undefined)
+  ) as UpdateGatewayBody;
+  return client.put<unknown>(`/gateways/${gatewayId}`, Object.keys(payload).length ? payload : {});
+}
+
+/** DELETE /gateways/{gatewayId} */
+export async function deleteGateway(
+  client: Client,
+  gatewayId: string
+): Promise<unknown> {
+  return client.delete<unknown>(`/gateways/${gatewayId}`);
+}
+
+/** GET /gateways/{gatewayId}/test – test connection, returns gateway with connection status. */
+export async function testGateway(
+  client: Client,
+  gatewayId: string
+): Promise<unknown> {
+  return client.get<unknown>(`/gateways/${gatewayId}/test`);
+}
+
+/** GET /gateways/{gatewayId}/client_token – client token for payment SDK (e.g. Braintree, Stripe). Optional customerId for PayFabric/vault. */
+export async function getClientToken(
+  client: Client,
+  gatewayId: string,
+  params?: { customerId?: number }
+): Promise<unknown> {
+  const q =
+    params?.customerId != null
+      ? `?customerId=${encodeURIComponent(String(params.customerId))}`
+      : "";
+  return client.get<unknown>(`/gateways/${gatewayId}/client_token${q}`);
+}
+
+/**
+ * GET /gateways/{companyGatewayId}/customers/{customerId}/setup_intent (under /v1 base URL).
+ * Used by gateway flows (e.g. Stripe) to create/retrieve a SetupIntent and use setupIntent.id as paymentMethodNonce.
+ */
+export async function createSetupIntent(
+  client: Client,
+  companyGatewayId: string,
+  customerId: string
+): Promise<unknown> {
+  return client.get<unknown>(
+    `/gateways/${encodeURIComponent(companyGatewayId)}/customers/${encodeURIComponent(
+      customerId
+    )}/setup_intent`
+  );
+}
