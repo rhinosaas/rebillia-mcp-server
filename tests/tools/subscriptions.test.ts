@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createSubscriptionTool } from "../../src/tools/subscriptions/createSubscription.js";
+import { listSubscriptionsTool } from "../../src/tools/subscriptions/listSubscriptions.js";
 import { updateSubscriptionStatusTool } from "../../src/tools/subscriptions/updateSubscriptionStatus.js";
 
 describe("Subscription tools", () => {
@@ -72,6 +73,65 @@ describe("Subscription tools", () => {
           status,
         });
       }
+    });
+  });
+
+  describe("list_subscriptions contract", () => {
+    it("documents new filter params with enum/format metadata", () => {
+      const properties = listSubscriptionsTool.definition.inputSchema.properties;
+
+      expect(properties).toHaveProperty("status");
+      expect(properties.status).toMatchObject({
+        type: "string",
+        enum: ["active", "paused", "requestPayment", "archived"],
+      });
+
+      expect(properties).toHaveProperty("customerId");
+      expect(properties.customerId).toMatchObject({
+        type: "integer",
+        format: "int64",
+      });
+
+      expect(properties).toHaveProperty("companyGatewayId");
+      expect(properties.companyGatewayId).toMatchObject({
+        type: "integer",
+        format: "int64",
+      });
+
+      expect(properties).toHaveProperty("dateFrom");
+      expect(properties.dateFrom).toMatchObject({
+        type: "string",
+        format: "date",
+        example: "2026-01-01",
+      });
+
+      expect(properties).toHaveProperty("dateTo");
+      expect(properties.dateTo).toMatchObject({
+        type: "string",
+        format: "date",
+        example: "2026-01-31",
+      });
+    });
+
+    it("accepts combined filters and forwards them in query string", async () => {
+      mockClient.get.mockResolvedValueOnce({
+        currentPageNumber: 1,
+        itemsPerPage: 25,
+        totalItems: 0,
+        totalPages: 0,
+        data: [],
+      });
+
+      await listSubscriptionsTool.handler(mockClient as never, {
+        status: "paused",
+        customerId: 123,
+        dateFrom: "2026-01-01",
+        dateTo: "2026-01-31",
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        "/subscriptions?status=paused&customerId=123&dateFrom=2026-01-01&dateTo=2026-01-31"
+      );
     });
   });
 });

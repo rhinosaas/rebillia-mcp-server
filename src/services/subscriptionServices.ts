@@ -12,6 +12,11 @@ export interface ListSubscriptionsParams {
   orderBy?: string;
   sortBy?: string;
   filterId?: number;
+  status?: SubscriptionStatus;
+  customerId?: number;
+  companyGatewayId?: number;
+  dateFrom?: string;
+  dateTo?: string;
   itemPerPage?: number;
   pageNo?: number;
 }
@@ -115,6 +120,13 @@ export async function listSubscriptions(
   if (params?.orderBy) search.append("orderBy", params.orderBy ?? "");
   if (params?.sortBy) search.append("sortBy", params.sortBy ?? "");
   if (params?.filterId != null) search.append("filterId", String(params.filterId));
+  if (params?.status) search.append("status", params.status);
+  if (params?.customerId != null) search.append("customerId", String(params.customerId));
+  if (params?.companyGatewayId != null) {
+    search.append("companyGatewayId", String(params.companyGatewayId));
+  }
+  if (params?.dateFrom) search.append("dateFrom", params.dateFrom);
+  if (params?.dateTo) search.append("dateTo", params.dateTo);
   if (params?.itemPerPage != null) search.append("itemPerPage", String(params.itemPerPage));
   if (params?.pageNo != null) search.append("pageNo", String(params.pageNo));
   const q = search.toString();
