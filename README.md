@@ -9,7 +9,7 @@ Model Context Protocol (MCP) server for the [Rebillia Public API](https://apigui
   - **Products** (8 tools) – List, get, create, update, delete; update status; link/unlink external products
   - **Product rate plans** (7 tools) – List by product, get, create, update, delete; update status; sync
   - **Product rate plan charges** (5 tools) – List by product rate plan, get, create, update, delete (with chargeType, chargeModel, billingPeriod, billingTiming enums and chargeTier array)
-  - **Subscriptions** (20 tools) – List, get, create, update, delete; status; next bill, upcoming charges, invoices, logs, external invoices; subscription rate plans and rate plan charges (add/update/remove)
+  - **Subscriptions** (19 tools) – List, get, create, update, delete; status; next bill, upcoming charges, invoices, logs, external invoices; subscription rate plans and rate plan charges (add/update/remove)
   - **Invoices** (8 tools) – List, get, create, update, delete; charge (card/online with paymentType), charge_external (offline), void
   - **Transactions** (4 tools) – List, get, refund (amount in **cents**), void (before settlement only)
   - **Bill runs** (4 tools) – List (filter by completed/pending/error), get, update (newDateTime, ISO 8601; pending only), get bill run invoices
@@ -134,7 +134,7 @@ The server uses **stdio** transport: it reads JSON-RPC from stdin and writes res
    - **Settings** → **Cursor Settings** → **MCP**, or
    - Open the MCP config file directly:
      - **macOS/Linux:** `~/.cursor/rebillia-mcp-server.json` or project-level `.cursor/mcp.json`
-     - **Windows:** `%USERPROFILE%\.cursor\-rebillia-mcp-server.json`
+  - **Windows:** `%USERPROFILE%\.cursor\rebillia-mcp-server.json`
 
 3. **Add the Rebillia server** in the MCP config. Example:
 
@@ -224,7 +224,7 @@ Responses are JSON from the Rebillia Public API (paginated for list endpoints, s
 
 | Tool | Description |
 |------|-------------|
-| `list_subscriptions` | List subscriptions (include, status, query, orderBy, sortBy, itemPerPage, pageNo). |
+| `list_subscriptions` | List subscriptions (include, query, orderBy, sortBy, filterId, status, customerId, companyGatewayId, dateFrom, dateTo, itemPerPage, pageNo). `status` supports: active, paused, requestPayment, archived. `dateFrom`/`dateTo` are `YYYY-MM-DD` createdAt-range filters. |
 | `get_subscription` | Get subscription by ID. |
 | `create_subscription` | Create subscription from product rate plan (productRatePlanId, customerId, customerPaymentMethodId, billingAddressId, effectiveStartDate). |
 | `update_subscription` | Update subscription by ID. |
@@ -354,50 +354,49 @@ API documentation is exposed as MCP resources under `rebillia://docs/*`. Use `re
 ## Project structure
 
 ```
-mcp/
-├── src/
-│   ├── index.ts              # MCP server entry, registerResources(), tools & resources handlers
-│   ├── client.ts             # HTTP client for Rebillia API (X-AUTH-TOKEN)
-│   ├── types.ts              # Rebillia API types (customers, invoices, etc.)
-│   ├── services/             # API call layer (used by tools)
-│   │   ├── customerServices.ts
-│   │   ├── productServices.ts
-│   │   ├── productRatePlanServices.ts
-│   │   ├── productRatePlanChargeServices.ts
-│   │   ├── subscriptionServices.ts
-│   │   ├── invoiceServices.ts
-│   │   ├── transactionServices.ts
-│   │   ├── billRunServices.ts
-│   │   ├── gatewayServices.ts
-│   │   ├── currencyServices.ts
-│   │   ├── integrationServices.ts
-│   │   ├── shippingServices.ts
-│   │   └── filterServices.ts
-│   ├── tools/
-│   │   ├── index.ts          # Tool registry, getToolDefinitions(), executeTool()
-│   │   ├── types.ts          # Tool definition and handler types
-│   │   ├── customers/        # Customer tools (21)
-│   │   ├── products/         # Product tools (8)
-│   │   ├── product_rate_plans/        # Product rate plan tools (7)
-│   │   ├── product_rate_plan_charges/# Product rate plan charge tools (5)
-│   │   ├── subscriptions/   # Subscription tools (20)
-│   │   ├── invoices/         # Invoice tools (8)
-│   │   ├── transactions/     # Transaction tools (4)
-│   │   ├── bill_runs/        # Bill run tools (4)
-│   │   ├── gateways/         # Gateway tools (8)
-│   │   ├── currencies/       # Currency tools (7)
-│   │   ├── integrations/     # Integration tools (8)
-│   │   ├── shipping/         # Shipping tools (2)
-│   │   ├── filters/          # Filter tools (4)
-│   │   └── docs/             # get_api_docs (1)
-│   ├── resources/
-│   │   ├── index.ts          # listResources(), readResource() (legacy apiResources)
-│   │   └── api-docs.ts       # registerResources(), docResources (rebillia://docs/*), getDocContent()
-│   └── prompts/              # (reserved for MCP prompts)
-├── .env.example
-├── package.json
-├── tsconfig.json
-└── README.md
+src/
+├── index.ts              # MCP server entry, tools + resources handlers
+├── client.ts             # HTTP client for Rebillia API (X-AUTH-TOKEN)
+├── types.ts              # Rebillia API types (customers, invoices, etc.)
+├── services/             # API call layer (used by tools)
+│   ├── customerServices.ts
+│   ├── productServices.ts
+│   ├── productRatePlanServices.ts
+│   ├── productRatePlanChargeServices.ts
+│   ├── subscriptionServices.ts
+│   ├── invoiceServices.ts
+│   ├── transactionServices.ts
+│   ├── billRunServices.ts
+│   ├── gatewayServices.ts
+│   ├── globalGatewayService.ts
+│   ├── countryResolverService.ts
+│   ├── currencyServices.ts
+│   ├── integrationServices.ts
+│   ├── shippingServices.ts
+│   └── filterServices.ts
+├── tools/
+│   ├── index.ts          # Tool registry, getToolDefinitions(), executeTool()
+│   ├── types.ts          # Tool definition and handler types
+│   ├── customers/        # Customer tools (21)
+│   ├── products/         # Product tools (8)
+│   ├── product_rate_plans/         # Product rate plan tools (7)
+│   ├── product_rate_plan_charges/  # Product rate plan charge tools (5)
+│   ├── subscriptions/    # Subscription tools (19)
+│   ├── invoices/         # Invoice tools (8)
+│   ├── transactions/     # Transaction tools (4)
+│   ├── bill_runs/        # Bill run tools (4)
+│   ├── gateways/         # Gateway tools (9)
+│   ├── currencies/       # Currency tools (7)
+│   ├── integrations/     # Integration tools (8)
+│   ├── shipping/         # Shipping tools (2)
+│   ├── filters/          # Filter tools (4)
+│   └── docs/             # get_api_docs (1)
+├── resources/
+│   ├── index.ts          # listResources(), readResource()
+│   └── api-docs.ts       # registerResources(), doc resources, getDocContent()
+├── prompts/              # (reserved for MCP prompts)
+└── types/
+    └── addressInput.ts
 ```
 
 ## Scripts
@@ -408,6 +407,7 @@ mcp/
 | start | `npm start` | Run `node dist/index.js` |
 | dev | `npm run dev` | Run with `tsx` (no build) |
 | test | `npm test` | Run Vitest |
+| test:run | `npm run test:run` | Run tests once (non-watch mode) |
 
 ## License
 
