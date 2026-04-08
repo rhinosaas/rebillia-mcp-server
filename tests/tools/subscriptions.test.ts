@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createSubscriptionTool } from "../../src/tools/subscriptions/createSubscription.js";
+import { listSubscriptionRatePlansTool } from "../../src/tools/subscriptions/listSubscriptionRatePlans.js";
 import { listSubscriptionsTool } from "../../src/tools/subscriptions/listSubscriptions.js";
 import { updateSubscriptionStatusTool } from "../../src/tools/subscriptions/updateSubscriptionStatus.js";
 
@@ -131,6 +132,41 @@ describe("Subscription tools", () => {
 
       expect(mockClient.get).toHaveBeenCalledWith(
         "/subscriptions?status=paused&customerId=123&dateFrom=2026-01-01&dateTo=2026-01-31"
+      );
+    });
+  });
+
+  describe("list_subscription_rate_plans", () => {
+    it("normalizes status/type filters and forwards them", async () => {
+      mockClient.get.mockResolvedValueOnce({
+        currentPageNumber: 1,
+        itemsPerPage: 25,
+        totalItems: 0,
+        totalPages: 0,
+        data: [],
+      });
+
+      await listSubscriptionRatePlansTool.handler(mockClient as never, {
+        subscriptionId: "sub-123",
+        status: "AcTiVe",
+        type: "PrePaid",
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        "/subscriptions/sub-123/rateplans?status=active&type=prepaid"
+      );
+    });
+
+    it("rejects unsupported status values", async () => {
+      const result = await listSubscriptionRatePlansTool.handler(mockClient as never, {
+        subscriptionId: "sub-123",
+        status: "paused",
+      });
+
+      expect(mockClient.get).not.toHaveBeenCalled();
+      expect(result.isError).toBe(true);
+      expect((result as { content: [{ text: string }] }).content[0].text).toMatch(
+        /invalid enum value/i
       );
     });
   });
