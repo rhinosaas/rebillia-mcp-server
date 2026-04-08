@@ -13,6 +13,9 @@ export type Client = InstanceType<typeof import("../client.js").default>;
 
 export interface ListProductsParams {
   include?: string;
+  status?: "published" | "draft" | "archived" | "disabled";
+  name?: string;
+  category?: "baseProducts" | "addOn" | "bundleProduct" | "miscellaneous" | "service";
   orderBy?: string;
   sortBy?: "ASC" | "DESC";
   itemPerPage?: number;
@@ -66,6 +69,9 @@ export async function listProducts(
 ): Promise<PaginatedResponse<unknown>> {
   const search = new URLSearchParams();
   if (params?.include) search.append("include", params.include);
+  if (params?.status) search.append("status", params.status);
+  if (params?.name) search.append("name", params.name);
+  if (params?.category) search.append("category", params.category);
   if (params?.orderBy) search.append("orderBy", params.orderBy);
   if (params?.sortBy) search.append("sortBy", params.sortBy);
   if (params?.itemPerPage != null) search.append("itemPerPage", String(params.itemPerPage));
