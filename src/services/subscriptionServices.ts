@@ -301,6 +301,8 @@ export interface ListSubscriptionRatePlansParams {
   itemPerPage?: number;
   orderBy?: string;
   sortBy?: string;
+  status?: "active" | "pause" | "cancel" | "archived";
+  type?: "ongoing" | "prepaid" | "contract";
 }
 
 /** List rate plans on a subscription. GET /subscriptions/{id}/rateplans */
@@ -315,6 +317,8 @@ export async function listSubscriptionRatePlans(
   if (params?.itemPerPage != null) search.append("itemPerPage", String(params.itemPerPage));
   if (params?.orderBy) search.append("orderBy", params.orderBy ?? "");
   if (params?.sortBy) search.append("sortBy", params.sortBy ?? "");
+  if (params?.status) search.append("status", params.status);
+  if (params?.type) search.append("type", params.type);
   const q = search.toString();
   return client.get<PaginatedResponse<unknown>>(
     `/subscriptions/${subscriptionId}/rateplans${q ? `?${q}` : ""}`

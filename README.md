@@ -234,7 +234,7 @@ Responses are JSON from the Rebillia Public API (paginated for list endpoints, s
 | `get_subscription_invoices` | Invoices for subscription. |
 | `get_subscription_logs` | Logs for subscription. |
 | `get_subscription_external_invoices` | External invoices. |
-| `list_subscription_rate_plans` | Rate plans on subscription. |
+| `list_subscription_rate_plans` | Rate plans on subscription (optional status: active\|pause\|cancel\|archived; type: ongoing\|prepaid\|contract, case-insensitive). |
 | `get_subscription_rate_plan` | Get rate plan by ID. |
 | `add_subscription_rate_plan` | Add rate plan to subscription. |
 | `update_subscription_rate_plan` | Update rate plan (effectiveStartDate, etc.). |
