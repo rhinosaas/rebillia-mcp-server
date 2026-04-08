@@ -5,6 +5,24 @@ import { errorResult, handleToolCall } from "./helpers.js";
 import * as transactionService from "../../services/transactionServices.js";
 
 const schema = z.object({
+  customerId: z.number().int().optional(),
+  invoiceId: z.number().int().optional(),
+  status: z
+    .enum([
+      "settled",
+      "authorized",
+      "declined",
+      "error",
+      "voided",
+      "requiresPaymentMethod",
+      "awaitingForSettlement",
+      "authorizeAndHold",
+    ])
+    .optional(),
+  type: z.enum(["sale", "refund"]).optional(),
+  dateFrom: z.string().optional(),
+  dateTo: z.string().optional(),
+  companyGatewayId: z.number().int().optional(),
   orderBy: z.string().optional(),
   sortBy: z.string().optional(),
   itemPerPage: z.number().int().min(1).optional(),
@@ -14,10 +32,34 @@ const schema = z.object({
 const definition = {
   name: "list_transactions",
   description:
-    "List transactions. GET /transactions. Optional: orderBy, sortBy, itemPerPage, pageNo.",
+    "List transactions. GET /transactions. Optional: customerId, invoiceId, status (settled|authorized|declined|error|voided|requiresPaymentMethod|awaitingForSettlement|authorizeAndHold), type (sale|refund), dateFrom, dateTo, companyGatewayId, orderBy, sortBy, itemPerPage, pageNo.",
   inputSchema: {
     type: "object" as const,
     properties: {
+      customerId: { type: "number", description: "Filter by customer ID" },
+      invoiceId: { type: "number", description: "Filter by invoice ID" },
+      status: {
+        type: "string",
+        enum: [
+          "settled",
+          "authorized",
+          "declined",
+          "error",
+          "voided",
+          "requiresPaymentMethod",
+          "awaitingForSettlement",
+          "authorizeAndHold",
+        ],
+        description: "Filter by transaction status",
+      },
+      type: {
+        type: "string",
+        enum: ["sale", "refund"],
+        description: "Filter by transaction type",
+      },
+      dateFrom: { type: "string", description: "Filter by date from (YYYY-MM-DD)" },
+      dateTo: { type: "string", description: "Filter by date to (YYYY-MM-DD)" },
+      companyGatewayId: { type: "number", description: "Filter by company gateway ID" },
       orderBy: { type: "string", description: "Sort column" },
       sortBy: { type: "string", description: "Sort direction" },
       itemPerPage: { type: "number", description: "Items per page" },
