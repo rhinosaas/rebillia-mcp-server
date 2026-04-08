@@ -11,7 +11,7 @@ Model Context Protocol (MCP) server for the [Rebillia Public API](https://apigui
   - **Product rate plan charges** (5 tools) – List by product rate plan, get, create, update, delete (with chargeType, chargeModel, billingPeriod, billingTiming enums and chargeTier array)
   - **Subscriptions** (19 tools) – List, get, create, update, delete; status; next bill, upcoming charges, invoices, logs, external invoices; subscription rate plans and rate plan charges (add/update/remove)
   - **Invoices** (8 tools) – List, get, create, update, delete; charge (card/online with paymentType), charge_external (offline), void
-  - **Transactions** (4 tools) – List, get, refund (amount in **cents**), void (before settlement only)
+- **Transactions** (4 tools) – List (customerId, invoiceId, status, type, dateFrom/dateTo, companyGatewayId, orderBy/sortBy, pagination), get, refund (amount in **cents**), void (before settlement only)
   - **Bill runs** (4 tools) – List (filter by completed/pending/error), get, update (newDateTime, ISO 8601; pending only), get bill run invoices
 - **Gateways** (9 tools) – List global gateways (discover gblGatewayId and required setting keys), list company gateways, get, create, update, delete, test gateway, get client token, create setup intent
 - **Currencies** (7 tools) – List, get, create, update, delete, get/set default currency
@@ -261,7 +261,7 @@ Responses are JSON from the Rebillia Public API (paginated for list endpoints, s
 
 | Tool | Description |
 |------|-------------|
-| `list_transactions` | List transactions (orderBy, sortBy, itemPerPage, pageNo). |
+| `list_transactions` | List transactions (customerId, invoiceId, status, type, dateFrom, dateTo, companyGatewayId, orderBy, sortBy, itemPerPage, pageNo). `status`: settled\|authorized\|declined\|error\|voided\|requiresPaymentMethod\|awaitingForSettlement\|authorizeAndHold. `type`: sale\|refund. |
 | `get_transaction` | Get transaction by ID. |
 | `refund_transaction` | Refund transaction. Required: transactionId, amount (**in cents**, e.g. 250 = $2.50). |
 | `void_transaction` | Void transaction (before settlement only). |
