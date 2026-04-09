@@ -34,6 +34,21 @@ export interface PaginationIncludeParams {
   include?: string;
 }
 
+export interface CustomerInvoiceListParams extends PaginationIncludeParams {
+  status?:
+    | "authorized"
+    | "posted"
+    | "canceled"
+    | "partialPaid"
+    | "paid"
+    | "voided"
+    | "refund"
+    | "partialRefund";
+  dateFrom?: string;
+  dateTo?: string;
+  subscriptionId?: string;
+}
+
 export interface CreateCustomerBody {
   firstName: string;
   lastName: string;
@@ -229,10 +244,14 @@ export async function deleteCustomer(
 export async function getCustomerInvoices(
   client: Client,
   customerId: string,
-  params?: PaginationIncludeParams
+  params?: CustomerInvoiceListParams
 ): Promise<PaginatedResponse<Invoice>> {
   const search = new URLSearchParams();
   if (params) appendParams(search, params as Record<string, unknown>);
+  if (params?.status) search.append("status", params.status);
+  if (params?.dateFrom) search.append("dateFrom", params.dateFrom);
+  if (params?.dateTo) search.append("dateTo", params.dateTo);
+  if (params?.subscriptionId) search.append("subscriptionId", params.subscriptionId);
   return client.get<PaginatedResponse<Invoice>>(
     `/customers/${customerId}/invoices${queryString(search)}`
   );

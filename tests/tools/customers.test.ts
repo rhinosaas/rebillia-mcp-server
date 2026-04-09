@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createCustomerTool } from "../../src/tools/customers/createCustomer.js";
+import { getCustomerInvoicesTool } from "../../src/tools/customers/getCustomerInvoices.js";
 import { createCustomerPaymentMethodTool } from "../../src/tools/customers/createCustomerPaymentMethod.js";
 import { deleteCustomerTool } from "../../src/tools/customers/deleteCustomer.js";
 import { listCustomersTool } from "../../src/tools/customers/listCustomers.js";
@@ -261,6 +262,49 @@ describe("Customer tools", () => {
       expect((result as { content: [{ text: string }] }).content[0].text).toMatch(
         /paymentMethodNonce is required/i
       );
+    });
+  });
+
+  describe("get_customer_invoices", () => {
+    it("supports status/date range/subscription filters", async () => {
+      const listResponse = {
+        currentPageNumber: 1,
+        itemsPerPage: 25,
+        totalItems: 0,
+        totalPages: 0,
+        data: [],
+      };
+      mockClient.get.mockResolvedValueOnce(listResponse);
+
+      const result = await getCustomerInvoicesTool.handler(mockClient as never, {
+        customerId: "cust-123",
+        pageNo: 1,
+        itemPerPage: 10,
+        include: "detail,transactions",
+        status: "paid",
+        dateFrom: "2026-01-01",
+        dateTo: "2026-01-31",
+        subscriptionId: "sub-999",
+      });
+
+      expect(mockClient.get).toHaveBeenCalledTimes(1);
+      expect(mockClient.get).toHaveBeenCalledWith(
+        "/customers/cust-123/invoices?pageNo=1&itemPerPage=10&include=detail%2Ctransactions&status=paid&dateFrom=2026-01-01&dateTo=2026-01-31&subscriptionId=sub-999"
+      );
+      expect(result.content).toHaveLength(1);
+      expect(JSON.parse((result as { content: [{ text: string }] }).content[0].text)).toEqual(
+        listResponse
+      );
+    });
+
+    it("rejects unsupported status", async () => {
+      const result = await getCustomerInvoicesTool.handler(mockClient as never, {
+        customerId: "cust-123",
+        status: "draft",
+      });
+
+      expect(mockClient.get).not.toHaveBeenCalled();
+      expect(result.isError).toBe(true);
     });
   });
 
