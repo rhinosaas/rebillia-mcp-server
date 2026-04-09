@@ -168,7 +168,7 @@ Responses are JSON from the Rebillia Public API (paginated for list endpoints, s
 | `create_customer` | Create customer (firstName, lastName, email, optional fields). |
 | `update_customer` | Update customer by ID. |
 | `delete_customer` | Delete customer by ID. |
-| `get_customer_invoices` | Get invoices for a customer. |
+| `get_customer_invoices` | Get invoices for a customer (optional: status = authorized\|posted\|canceled\|partialPaid\|paid\|voided\|refund\|partialRefund, dateFrom, dateTo, subscriptionId, include, pageNo, itemPerPage). |
 | `get_customer_subscriptions` | Get subscriptions for a customer. |
 | `get_customer_logs` | Get logs for a customer. |
 | `list_customer_addresses` | List address book entries for a customer (pageNo, itemPerPage). |
