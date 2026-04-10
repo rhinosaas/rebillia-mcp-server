@@ -257,6 +257,19 @@ export async function getCustomerInvoices(
   );
 }
 
+export async function getCustomerUnpaidInvoices(
+  client: Client,
+  customerId: string,
+  params?: Pick<PaginationIncludeParams, "pageNo" | "itemPerPage">
+): Promise<PaginatedResponse<Invoice>> {
+  const search = new URLSearchParams();
+  if (params?.pageNo != null) search.append("pageNo", String(params.pageNo));
+  if (params?.itemPerPage != null) search.append("itemPerPage", String(params.itemPerPage));
+  return client.get<PaginatedResponse<Invoice>>(
+    `/customers/${customerId}/invoices/unpaid${queryString(search)}`
+  );
+}
+
 export async function getCustomerSubscriptions(
   client: Client,
   customerId: string,
