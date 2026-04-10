@@ -201,5 +201,11 @@ describe("RebilliaClient", () => {
         /Rebillia API error \(500 Internal Server Error\): Internal Server Error/
       );
     });
+
+    it("throws timeout error on aborted request", async () => {
+      fetchMock.mockRejectedValueOnce(new DOMException("The operation was aborted.", "AbortError"));
+      const client = new RebilliaClient(apiKey, baseUrl);
+      await expect(client.get("/customers")).rejects.toThrow(/timed out after/);
+    });
   });
 });

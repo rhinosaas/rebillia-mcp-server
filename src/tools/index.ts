@@ -39,6 +39,7 @@ const tools: Tool[] = [
   ...registerFilterTools(),
   ...registerDocsTools(),
 ];
+const toolsByName = new Map<string, Tool>(tools.map((tool) => [tool.definition.name, tool]));
 
 /** All tool definitions for tools/list */
 export function getToolDefinitions(): ToolDefinition[] {
@@ -51,7 +52,7 @@ export async function executeTool(
   args: Record<string, unknown> | undefined,
   client: RebilliaClient
 ): Promise<ToolResult | undefined> {
-  const tool = tools.find((t) => t.definition.name === name);
+  const tool = toolsByName.get(name);
   if (!tool) return undefined;
   return tool.handler(client, args);
 }

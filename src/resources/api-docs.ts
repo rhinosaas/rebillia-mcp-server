@@ -364,7 +364,7 @@ export function registerResources(
           {
             uri,
             mimeType: "application/json",
-            text: JSON.stringify(countries, null, 2),
+            text: JSON.stringify(countries),
           },
         ],
       };
@@ -380,7 +380,7 @@ export function registerResources(
           {
             uri,
             mimeType: "application/json",
-            text: JSON.stringify(gateways, null, 2),
+            text: JSON.stringify(gateways),
           },
         ],
       };

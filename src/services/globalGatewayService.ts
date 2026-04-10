@@ -18,6 +18,9 @@ export interface GlobalGatewayItem {
   fieldDetails?: GlobalGatewaySettingField[];
 }
 
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+let cache: { items: GlobalGatewayItem[]; expiresAt: number } | null = null;
+
 interface RawSettingItem {
   displayName?: string;
   keyName?: string;
@@ -33,6 +36,10 @@ function extractSettingList(raw: unknown): RawSettingItem[] {
     ) as RawSettingItem[];
   }
   return [];
+}
+
+function isCacheValid(): boolean {
+  return cache !== null && Date.now() < cache.expiresAt;
 }
 
 function extractGatewayList(raw: unknown): Record<string, unknown>[] {
@@ -87,6 +94,10 @@ function normalizeGateway(raw: Record<string, unknown>): GlobalGatewayItem | nul
  * Each item includes gblGatewayId, name, keyName, requiredFields (setting keys), and optional fieldDetails (keyName + displayName).
  */
 export async function listGlobalGateways(client: Client): Promise<GlobalGatewayItem[]> {
+  if (isCacheValid()) {
+    return cache!.items;
+  }
+
   const raw = await client.getRoot<unknown>("/globals/gateways");
   const list = extractGatewayList(raw);
   const items: GlobalGatewayItem[] = [];
@@ -94,5 +105,9 @@ export async function listGlobalGateways(client: Client): Promise<GlobalGatewayI
     const normalized = normalizeGateway(g);
     if (normalized) items.push(normalized);
   }
+  cache = {
+    items,
+    expiresAt: Date.now() + CACHE_TTL_MS,
+  };
   return items;
 }
