@@ -15,6 +15,7 @@ import { deleteCustomerTool } from "./deleteCustomer.js";
 import { getCustomerAddressTool } from "./getCustomerAddress.js";
 import { getCustomerPaymentMethodTool } from "./getCustomerPaymentMethod.js";
 import { getCustomerInvoicesTool } from "./getCustomerInvoices.js";
+import { getCustomerUnpaidInvoicesTool } from "./getCustomerUnpaidInvoices.js";
 import { getCustomerLogsTool } from "./getCustomerLogs.js";
 import { getCustomerSubscriptionsTool } from "./getCustomerSubscriptions.js";
 import { getCustomerTool } from "./getCustomer.js";
@@ -26,7 +27,7 @@ import { updateCustomerAddressTool } from "./updateCustomerAddress.js";
 import { updateCustomerPaymentMethodTool } from "./updateCustomerPaymentMethod.js";
 import { updateCustomerTool } from "./updateCustomer.js";
 
-/** All 18 customer tools. Register with the main tool registry. */
+/** All customer tools. Register with the main tool registry. */
 export function registerCustomerTools(): Tool[] {
   return [
     listCustomersTool,
@@ -35,6 +36,7 @@ export function registerCustomerTools(): Tool[] {
     updateCustomerTool,
     deleteCustomerTool,
     getCustomerInvoicesTool,
+    getCustomerUnpaidInvoicesTool,
     getCustomerSubscriptionsTool,
     getCustomerLogsTool,
     listCustomerAddressesTool,
@@ -59,6 +61,7 @@ export { createCustomerTool } from "./createCustomer.js";
 export { updateCustomerTool } from "./updateCustomer.js";
 export { deleteCustomerTool } from "./deleteCustomer.js";
 export { getCustomerInvoicesTool } from "./getCustomerInvoices.js";
+export { getCustomerUnpaidInvoicesTool } from "./getCustomerUnpaidInvoices.js";
 export { getCustomerSubscriptionsTool } from "./getCustomerSubscriptions.js";
 export { getCustomerLogsTool } from "./getCustomerLogs.js";
 export { listCustomerAddressesTool } from "./listCustomerAddresses.js";

@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createCustomerTool } from "../../src/tools/customers/createCustomer.js";
 import { getCustomerInvoicesTool } from "../../src/tools/customers/getCustomerInvoices.js";
+import { getCustomerUnpaidInvoicesTool } from "../../src/tools/customers/getCustomerUnpaidInvoices.js";
 import { createCustomerPaymentMethodTool } from "../../src/tools/customers/createCustomerPaymentMethod.js";
 import { deleteCustomerTool } from "../../src/tools/customers/deleteCustomer.js";
 import { listCustomersTool } from "../../src/tools/customers/listCustomers.js";
@@ -302,6 +303,41 @@ describe("Customer tools", () => {
         customerId: "cust-123",
         status: "draft",
       });
+
+      expect(mockClient.get).not.toHaveBeenCalled();
+      expect(result.isError).toBe(true);
+    });
+  });
+
+  describe("get_customer_unpaid_invoices", () => {
+    it("calls GET /customers/{customerId}/invoices/unpaid with pagination", async () => {
+      const listResponse = {
+        currentPageNumber: 2,
+        itemsPerPage: 10,
+        totalItems: 3,
+        totalPages: 1,
+        data: [],
+      };
+      mockClient.get.mockResolvedValueOnce(listResponse);
+
+      const result = await getCustomerUnpaidInvoicesTool.handler(mockClient as never, {
+        customerId: "cust-123",
+        pageNo: 2,
+        itemPerPage: 10,
+      });
+
+      expect(mockClient.get).toHaveBeenCalledTimes(1);
+      expect(mockClient.get).toHaveBeenCalledWith(
+        "/customers/cust-123/invoices/unpaid?pageNo=2&itemPerPage=10"
+      );
+      expect(result.content).toHaveLength(1);
+      expect(JSON.parse((result as { content: [{ text: string }] }).content[0].text)).toEqual(
+        listResponse
+      );
+    });
+
+    it("returns error when customerId missing", async () => {
+      const result = await getCustomerUnpaidInvoicesTool.handler(mockClient as never, {});
 
       expect(mockClient.get).not.toHaveBeenCalled();
       expect(result.isError).toBe(true);

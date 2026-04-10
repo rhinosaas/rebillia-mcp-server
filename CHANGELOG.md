@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- REB-4438: Added `get_customer_unpaid_invoices` for `GET /customers/{customerId}/invoices/unpaid` with pagination support (`pageNo`, `itemPerPage`), including customer tool registration, service wiring, tests, and README docs updates.
 - REB-4430: Added `list_products` filters for `status` (`published|draft|archived|disabled`), `name`, and `category` (`baseProducts|addOn|bundleProduct|miscellaneous|service`) in tool schema, API query forwarding, and README docs.
 - REB-4433: Added `list_transactions` filters for `customerId`, `invoiceId`, `status` (`settled|authorized|declined|error|voided|requiresPaymentMethod|awaitingForSettlement|authorizeAndHold`), `type` (`sale|refund`), `dateFrom`, `dateTo`, and `companyGatewayId`; wired query forwarding, added tool tests, and updated README docs.
 - REB-4432: Added `list_subscription_rate_plans` filters for `status` (`active|pause|cancel|archived`) and `type` (`ongoing|prepaid|contract`) with case-insensitive normalization, wired query forwarding, added tests, and updated README docs.

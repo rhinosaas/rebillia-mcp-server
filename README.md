@@ -5,7 +5,7 @@ Model Context Protocol (MCP) server for the [Rebillia Public API](https://apigui
 ## Features
 
 - **Tools** – Call Rebillia endpoints from your MCP client (e.g. Cursor, Claude Desktop):
-  - **Customers** (21 tools) – List, get, create, update, delete; invoices, subscriptions, logs; addresses and payment methods; charges/credits
+  - **Customers** (22 tools) – List, get, create, update, delete; invoices (including unpaid), subscriptions, logs; addresses and payment methods; charges/credits
   - **Products** (8 tools) – List, get, create, update, delete; update status; link/unlink external products
   - **Product rate plans** (7 tools) – List by product, get, create, update, delete; update status; sync
   - **Product rate plan charges** (5 tools) – List by product rate plan, get, create, update, delete (with chargeType, chargeModel, billingPeriod, billingTiming enums and chargeTier array)
@@ -159,7 +159,7 @@ The server uses **stdio** transport: it reads JSON-RPC from stdin and writes res
 
 Responses are JSON from the Rebillia Public API (paginated for list endpoints, single object for get).
 
-#### Customers (21 tools)
+#### Customers (22 tools)
 
 | Tool | Description |
 |------|-------------|
@@ -169,6 +169,7 @@ Responses are JSON from the Rebillia Public API (paginated for list endpoints, s
 | `update_customer` | Update customer by ID. |
 | `delete_customer` | Delete customer by ID. |
 | `get_customer_invoices` | Get invoices for a customer (optional: status = authorized\|posted\|canceled\|partialPaid\|paid\|voided\|refund\|partialRefund, dateFrom, dateTo, subscriptionId, include, pageNo, itemPerPage). |
+| `get_customer_unpaid_invoices` | Get unpaid invoices for a customer (`GET /customers/{customerId}/invoices/unpaid`) with optional `pageNo`, `itemPerPage`. |
 | `get_customer_subscriptions` | Get subscriptions for a customer. |
 | `get_customer_logs` | Get logs for a customer. |
 | `list_customer_addresses` | List address book entries for a customer (pageNo, itemPerPage). |
@@ -377,7 +378,7 @@ src/
 ├── tools/
 │   ├── index.ts          # Tool registry, getToolDefinitions(), executeTool()
 │   ├── types.ts          # Tool definition and handler types
-│   ├── customers/        # Customer tools (21)
+│   ├── customers/        # Customer tools (22)
 │   ├── products/         # Product tools (8)
 │   ├── product_rate_plans/         # Product rate plan tools (7)
 │   ├── product_rate_plan_charges/  # Product rate plan charge tools (5)
