@@ -36,7 +36,7 @@ const rebilliaClient = new RebilliaClient(REBILLIA_API_KEY, REBILLIA_API_URL);
 
 const server = new Server(
   {
-    name: "rebillia-mcp-server",
+    name: "mcp-server",
     version: "1.0",
   },
   {

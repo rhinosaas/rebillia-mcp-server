@@ -111,7 +111,7 @@ The server uses **stdio** transport: it reads JSON-RPC from stdin and writes res
      "mcpServers": {
        "rebillia": {
          "command": "npx",
-         "args": ["@rhinosaas/rebillia-mcp-server"],
+         "args": ["@rebilliaai/mcp-server"],
          "env": {
            "REBILLIA_API_KEY": "YOUR_API_KEY",
            "REBILLIA_API_URL": "https://api.rebillia.com/v1"
@@ -143,7 +143,7 @@ The server uses **stdio** transport: it reads JSON-RPC from stdin and writes res
      "mcpServers": {
        "rebillia": {
          "command": "npx",
-         "args": ["@rhinosaas/rebillia-mcp-server"],
+         "args": ["@rebilliaai/mcp-server"],
          "env": {
            "REBILLIA_API_KEY": "your_api_key_here",
            "REBILLIA_API_URL": "https://api.rebillia.com/v1"
