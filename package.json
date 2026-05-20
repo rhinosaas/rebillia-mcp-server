@@ -44,8 +44,8 @@
     "prepublishOnly": "npm run build && npm test"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^0.5.0",
-    "dotenv": "^17.3.1",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "dotenv": "^17.4.2",
     "node-fetch": "^3.3.2",
     "zod": "^3.22.4"
   },
@@ -53,6 +53,6 @@
     "@types/node": "^20.11.0",
     "tsx": "^4.7.0",
     "typescript": "^5.3.3",
-    "vitest": "^1.2.0"
+    "vitest": "^4.1.7"
   }
 }
