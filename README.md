@@ -1,4 +1,11 @@
 # Rebillia MCP Server
+[![npm version](https://img.shields.io/npm/v/@rebilliaai/mcp-server.svg)](https://www.npmjs.com/package/@rebilliaai/mcp-server)
+[![npm downloads](https://img.shields.io/npm/dw/@rebilliaai/mcp-server.svg)](https://www.npmjs.com/package/@rebilliaai/mcp-server)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node.js](https://img.shields.io/node/v/@rebilliaai/mcp-server.svg)](https://nodejs.org/)
+
+[![Add to Cursor](https://cursor.com/deeplink/mcp-install-badge.svg)](cursor://anysphere.cursor-deeplink/mcp/install?name=rebillia&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22%40rebilliaai%2Fmcp-server%22%5D%2C%22env%22%3A%7B%22REBILLIA_API_KEY%22%3A%22%22%2C%22REBILLIA_API_URL%22%3A%22https%3A%2F%2Fapi.rebillia.com%2Fv1%22%7D%7D)
+[![Add to Claude](https://img.shields.io/badge/Add%20to-Claude%20Desktop-blue?logo=anthropic)](https://claude.ai/settings/integrations/install?url=https://github.com/rhinosaas/rebillia-mcp-server)
 
 Model Context Protocol (MCP) server for the [Rebillia Public API](https://apiguide.rebillia.com/). It exposes **tools** to call the API and **resources** with API documentation so AI assistants can manage customers, products, rate plans, and understand the API.
 
@@ -111,7 +118,7 @@ The server uses **stdio** transport: it reads JSON-RPC from stdin and writes res
      "mcpServers": {
        "rebillia": {
          "command": "npx",
-         "args": ["@rebilliaai/mcp-server"],
+         "args": [“-y”, “@rebilliaai/mcp-server”],
          "env": {
            "REBILLIA_API_KEY": "YOUR_API_KEY",
            "REBILLIA_API_URL": "https://api.rebillia.com/v1"
@@ -133,7 +140,7 @@ The server uses **stdio** transport: it reads JSON-RPC from stdin and writes res
 2. **Open Cursor MCP settings:**
    - **Settings** → **Cursor Settings** → **MCP**, or
    - Open the MCP config file directly:
-     - **macOS/Linux:** `~/.cursor/rebillia-mcp-server.json` or project-level `.cursor/mcp.json`
+     - **macOS/Linux:** `~/.cursor/mcp.json` or project-level `.cursor/mcp.json`
   - **Windows:** `%USERPROFILE%\.cursor\rebillia-mcp-server.json`
 
 3. **Add the Rebillia server** in the MCP config. Example:
@@ -143,7 +150,7 @@ The server uses **stdio** transport: it reads JSON-RPC from stdin and writes res
      "mcpServers": {
        "rebillia": {
          "command": "npx",
-         "args": ["@rebilliaai/mcp-server"],
+         "args": [“-y”, “@rebilliaai/mcp-server”],
          "env": {
            "REBILLIA_API_KEY": "your_api_key_here",
            "REBILLIA_API_URL": "https://api.rebillia.com/v1"
