@@ -6,6 +6,7 @@
 
 [![Add to Cursor](https://cursor.com/deeplink/mcp-install-badge.svg)](cursor://anysphere.cursor-deeplink/mcp/install?name=rebillia&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22%40rebilliaai%2Fmcp-server%22%5D%2C%22env%22%3A%7B%22REBILLIA_API_KEY%22%3A%22%22%2C%22REBILLIA_API_URL%22%3A%22https%3A%2F%2Fapi.rebillia.com%2Fv1%22%7D%7D)
 [![Add to Claude](https://img.shields.io/badge/Add%20to-Claude%20Desktop-blue?logo=anthropic)](https://claude.ai/settings/integrations/install?url=https://github.com/rhinosaas/rebillia-mcp-server)
+[![Documentation](https://img.shields.io/badge/docs-rebillia.com-blue)](https://docs.rebillia.com/en/articles/15307650-mcp-server)
 
 Model Context Protocol (MCP) server for the [Rebillia Public API](https://apiguide.rebillia.com/). It exposes **tools** to call the API and **resources** with API documentation so AI assistants can manage customers, products, rate plans, and understand the API.
 
@@ -42,8 +43,11 @@ Model Context Protocol (MCP) server for the [Rebillia Public API](https://apigui
 4. After you’re in your company, open the **dashboard**.
 5. In the dashboard, **copy your API Token** and use it as `REBILLIA_API_KEY` in your environment or MCP client config.
 
-## Setup
+## Quick Start
+No installation needed — `npx` handles everything automatically. Once you have your API Key, just choose your AI client in the [Usage](#usage) section below and paste the config.
 
+## Development
+For contributors who want to run the server locally from source.
 1. **Clone and install**
 
    ```bash
@@ -141,7 +145,7 @@ The server uses **stdio** transport: it reads JSON-RPC from stdin and writes res
    - **Settings** → **Cursor Settings** → **MCP**, or
    - Open the MCP config file directly:
      - **macOS/Linux:** `~/.cursor/mcp.json` or project-level `.cursor/mcp.json`
-  - **Windows:** `%USERPROFILE%\.cursor\rebillia-mcp-server.json`
+  - **Windows:** `%USERPROFILE%\.cursor\mcp.json`
 
 3. **Add the Rebillia server** in the MCP config. Example:
 
