@@ -80,42 +80,15 @@ For contributors who want to run the server locally from source.
    ```
 
 ## Usage
-
-### Running the server
-
-Development (no build step):
-
-```bash
-npm run dev
-```
-
-Production:
-
-```bash
-npm run build
-npm start
-```
-
-Or run the binary:
-
-```bash
-./node_modules/.bin/rebillia-mcp-server
-```
-
 The server uses **stdio** transport: it reads JSON-RPC from stdin and writes responses to stdout. MCP clients connect to it as a subprocess.
 
 ### Configuring Claude Desktop
 
-1. **Build the server** (if you haven’t already):
-   ```bash
-   npm run build
-   ```
-
-2. **Open the Claude Desktop MCP config file:**
+1. **Open the Claude Desktop MCP config file:**
    - **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
    - **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
 
-3. **Add the Rebillia server** under `mcpServers`:
+2. **Add the Rebillia server** under `mcpServers`:
 
    ```json
    {
@@ -132,22 +105,17 @@ The server uses **stdio** transport: it reads JSON-RPC from stdin and writes res
    }
    ```
 
-4. **Restart Claude Desktop.** The Rebillia tools and resources (including `get_api_docs`) will appear. You can ask Claude to use the Rebillia API or to “get the API docs” for overview information.
+3. **Restart Claude Desktop.** The Rebillia tools and resources (including `get_api_docs`) will appear. You can ask Claude to use the Rebillia API or to “get the API docs” for overview information.
 
 ### Configuring Cursor
 
-1. **Build the server:**
-   ```bash
-   npm run build
-   ```
-
-2. **Open Cursor MCP settings:**
+1. **Open Cursor MCP settings:**
    - **Settings** → **Cursor Settings** → **MCP**, or
    - Open the MCP config file directly:
      - **macOS/Linux:** `~/.cursor/mcp.json` or project-level `.cursor/mcp.json`
   - **Windows:** `%USERPROFILE%\.cursor\mcp.json`
 
-3. **Add the Rebillia server** in the MCP config. Example:
+2. **Add the Rebillia server** in the MCP config. Example:
 
    ```json
    {
@@ -164,7 +132,7 @@ The server uses **stdio** transport: it reads JSON-RPC from stdin and writes res
    }
    ```
 
-4. **Restart Cursor** or reload the MCP servers. Rebillia tools and resources will be available in the AI chat (e.g. “List customers”, “Get API docs”).
+3. **Restart Cursor** or reload the MCP servers. Rebillia tools and resources will be available in the AI chat (e.g. “List customers”, “Get API docs”).
 
 ### Tools
 
